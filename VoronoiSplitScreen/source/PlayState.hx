@@ -20,6 +20,7 @@ import sys.io.File;
 import openfl.utils.ByteArray;
 import flixel.addons.util.PNGEncoder;
 import flash.filters.BitmapFilter;
+import flixel.math.FlxMath;
 
 using flixel.util.FlxSpriteUtil;
 
@@ -52,6 +53,18 @@ class PlayState extends FlxState
 	var maxDistanceBetweenPlayers : Float = 216;
 	
 	var centerOfPlayers : FlxSprite;
+	
+	var player1Zone : FlxSprite;
+	var player1ZoneMask : FlxSprite;
+	var player1ZoneFinal : FlxSprite;
+	
+	var player2Zone : FlxSprite;
+	var player2ZoneMask : FlxSprite;
+	var player2ZoneFinal : FlxSprite;
+	
+	var spriteTemp : FlxSprite = new FlxSprite();
+	var spriteTempMask : FlxSprite = new FlxSprite();
+	var spriteTempOutput : FlxSprite = new FlxSprite();
 	
 	override public function create():Void
 	{
@@ -114,6 +127,39 @@ class PlayState extends FlxState
 		cameraBoth.visible = false;
 		FlxG.cameras.add(cameraBoth);
 		
+		//var player1Zone : FlxSprite;
+		//var player1ZoneMask : FlxSprite;
+		//var player1ZoneFinal : FlxSprite;
+		//
+		//var player2Zone : FlxSprite;
+		//var player2ZoneMask : FlxSprite;
+		//var player2ZoneFinal : FlxSprite;
+		
+		player1Zone = new FlxSprite();
+		player1Zone.makeGraphic(FlxG.width, FlxG.height, FlxColor.RED);
+		
+		player1ZoneMask = new FlxSprite();
+		player1ZoneMask.makeGraphic(FlxG.width, FlxG.height - 1, FlxColor.TRANSPARENT); // TODO: Sans le -1 ça marche pas -_-
+		
+		player1ZoneFinal = new FlxSprite();
+		player1ZoneFinal.cameras = [cameraHud];
+		add(player1ZoneFinal);
+		
+		player2Zone = new FlxSprite();
+		player2Zone.makeGraphic(FlxG.width, FlxG.height, FlxColor.BLUE);
+		
+		player2ZoneMask = new FlxSprite();
+		player2ZoneMask.makeGraphic(FlxG.width, FlxG.height - 1, FlxColor.TRANSPARENT); // TODO: Sans le -1 ça marche pas -_-
+		
+		player2ZoneFinal = new FlxSprite();
+		player2ZoneFinal.cameras = [cameraHud];
+		add(player2ZoneFinal);
+		
+		//spriteTempOutput.cameras = [cameraHud];
+		//spriteTemp.makeGraphic(FlxG.width, FlxG.height, FlxColor.RED);
+		//spriteTempMask.makeGraphic(FlxG.width, FlxG.height-1, FlxColor.TRANSPARENT);
+		//add(spriteTempOutput);
+		
 		// MVP : https://groups.google.com/forum/#!topic/haxeflixel/GIE-Als5Soc
 		// Pour, par défaut, afficher les sprites sur les caméras player1, player2 et worldmap quoi
 		FlxCamera.defaultCameras = [camera1, camera2, cameraDebug, cameraBoth];
@@ -129,9 +175,7 @@ class PlayState extends FlxState
 		super.update(elapsed);
 		
 		//trace(FlxG.renderBlit, FlxG.renderTile, FlxG.renderMethod);
-		trace(camera1.canvas);
-		var t = new BitmapFilter();
-		BitmapFilter.
+		//trace(camera1.canvas);
 		
 		if (FlxG.keys.pressed.Z) {
 			player1Sprite.y -= speed;
@@ -353,9 +397,146 @@ class PlayState extends FlxState
 			//trace(camera1.flashSprite); 
 			//trace(camera1.canvas.graphics); 
 		//}
+		
+		/////////////////
+		var intersectionUp:FlxVector = perpendiculaire.findIntersection(FlxVector.get(FlxG.width/2, FlxG.height/2), FlxVector.get(0, 0), FlxVector.get(FlxG.width, 0));
+		var intersectionDown:FlxVector = perpendiculaire.findIntersection(FlxVector.get(FlxG.width/2, FlxG.height/2), FlxVector.get(0, FlxG.height),  FlxVector.get(FlxG.width, 0));
+		
+		var intersectionLeft:FlxVector = perpendiculaire.findIntersection(FlxVector.get(FlxG.width/2, FlxG.height/2), FlxVector.get(0, 0),  FlxVector.get(0, FlxG.height));
+		var intersectionRight:FlxVector = perpendiculaire.findIntersection(FlxVector.get(FlxG.width/2, FlxG.height/2), FlxVector.get(FlxG.width, 0),  FlxVector.get(0, FlxG.height));
+		
+		// On déborde un peu pour éviter qu'à cause des imprécisions (x à -0.05 par exemple), ça ne s'affiche pas tout le temps
+		var screenRect:FlxRect = FlxRect.weak(-16, -16, FlxG.width + 32, FlxG.height + 32);
+		
+		if (intersectionUp.inRect(screenRect)) {
+			canvasHud.drawCircle(intersectionUp.x, intersectionUp.y, 10, FlxColor.CYAN);
+		}
+		if (intersectionDown.inRect(screenRect)) {
+			canvasHud.drawCircle(intersectionDown.x, intersectionDown.y, 10, FlxColor.CYAN);
+		}
+		
+		if (intersectionLeft.inRect(screenRect)) {
+			canvasHud.drawCircle(intersectionLeft.x, intersectionLeft.y, 10, FlxColor.CYAN);
+		}
+		if (intersectionRight.inRect(screenRect)) {
+			canvasHud.drawCircle(intersectionRight.x, intersectionRight.y, 10, FlxColor.CYAN);
+		}
+		
+		// Si négatif, joueur rouge à gauche
+		// -90 => 		joueur rouge pile à gauche du joueur bleu
+		// -180/180 => 	joueur rouge pile en dessous du joueur bleu
+		// 90 => 		joueur rouge pile à droite du joueur bleu
+		// 0 => 		joueur rouge pile au dessus du joueur bleu
+		//trace(perpendiculaire.degrees);
+		
+		//if (FlxMath.inBounds(perpendiculaire.degrees, 0, 90)) {
+			//
+		//} else if (FlxMath.inBounds(perpendiculaire.degrees, 90, 180)) {
+			//
+		//} else if (FlxMath.inBounds(perpendiculaire.degrees, -90, 0)) {
+			//
+		//} else if (FlxMath.inBounds(perpendiculaire.degrees, -180, 90)){
+			//
+		//} else {
+			//trace("pas normal !");
+		//}
+		
+		// TODO: pas recalculer tout le temps
+		var dxOverDy:Float = perpendiculaire.dx / perpendiculaire.dy;
+		//trace(dxOverDy / (FlxG.width / FlxG.height));
+		
+		player1ZoneMask.fill(FlxColor.TRANSPARENT);
+		player2ZoneMask.fill(FlxColor.TRANSPARENT);
+		
+		// TODO: faire un math.abs ? plus opti ?
+		// TODO: vu que ça inverse d'un côté à l'autre, y'a moyen de factoriser
+		if (FlxMath.inBounds(dxOverDy, -1, 1)) {
+			// -1 à 1 => rouge à gauche (ou droite)
+			if (player1Sprite.x < player2Sprite.x) {
+				// rouge à gauche (coin haut gauche et bas gauche)
+				
+				//player1ZoneMask.drawPolygon([FlxPoint.weak(0, 0), 
+											//FlxPoint.weak(intersectionUp.x, 0), 
+											//FlxPoint.weak(intersectionDown.x, FlxG.height), 
+											//FlxPoint.weak(0, FlxG.height)], 
+											//FlxColor.BLACK);
+											
+				player2ZoneMask.drawPolygon([FlxPoint.weak(intersectionUp.x, 0), 
+											FlxPoint.weak(FlxG.width, 0), 
+											FlxPoint.weak(FlxG.width, FlxG.height), 
+											FlxPoint.weak(intersectionDown.x, FlxG.height)], 
+											FlxColor.BLACK);
+											
+			} else {
+				// rouge à droite (coin haut droit et bas droite)
+				
+				//player1ZoneMask.drawPolygon([FlxPoint.weak(intersectionUp.x, 0), 
+											//FlxPoint.weak(FlxG.width, 0), 
+											//FlxPoint.weak(FlxG.width, FlxG.height), 
+											//FlxPoint.weak(intersectionDown.x, FlxG.height)], 
+											//FlxColor.BLACK);
+											
+				player2ZoneMask.drawPolygon([FlxPoint.weak(0, 0), 
+											FlxPoint.weak(intersectionUp.x, 0), 
+											FlxPoint.weak(intersectionDown.x, FlxG.height), 
+											FlxPoint.weak(0, FlxG.height)], 
+											FlxColor.BLACK);
+			}
+		} else {
+			// au dessus ou en dessous => en bas (ou haut)
+			if (player1Sprite.y < player2Sprite.y) {
+				// rouge en haut (coin haut gauche et haut droite)
+				
+				//player1ZoneMask.drawPolygon([FlxPoint.weak(0, 0), 
+											//FlxPoint.weak(FlxG.width, 0), 
+											//FlxPoint.weak(FlxG.width, intersectionRight.y), 
+											//FlxPoint.weak(0, intersectionLeft.y)], 
+											//FlxColor.BLACK);
+				
+				player2ZoneMask.drawPolygon([FlxPoint.weak(0, intersectionLeft.y), 
+											FlxPoint.weak(FlxG.width, intersectionRight.y), 
+											FlxPoint.weak(FlxG.width, FlxG.height), 
+											FlxPoint.weak(0, FlxG.height)], 
+											FlxColor.BLACK);
+			} else {
+				// rouge en bas (coin bas gauche et bas droite)
+				
+				player1ZoneMask.drawPolygon([FlxPoint.weak(0, intersectionLeft.y), 
+											FlxPoint.weak(FlxG.width, intersectionRight.y), 
+											FlxPoint.weak(FlxG.width, FlxG.height), 
+											FlxPoint.weak(0, FlxG.height)], 
+											FlxColor.BLACK);
+				
+				player2ZoneMask.drawPolygon([FlxPoint.weak(0, 0), 
+											FlxPoint.weak(FlxG.width, 0), 
+											FlxPoint.weak(FlxG.width, intersectionRight.y), 
+											FlxPoint.weak(0, intersectionLeft.y)], 
+											FlxColor.BLACK);
+			}
+		}
+		
+		FlxSpriteUtil.alphaMaskFlxSprite(player1Zone, player1ZoneMask, player1ZoneFinal);
+		player1ZoneFinal.alpha = 0.3;
+		
+		FlxSpriteUtil.alphaMaskFlxSprite(player2Zone, player2ZoneMask, player2ZoneFinal);
+		player2ZoneFinal.alpha = 0.3;
+		
+		// https://groups.google.com/forum/#!topic/haxeflixel/JX45NAgT49k
+		// http://coinflipstudios.com/devblog/?p=421 ?
+		
+		// OK
+		//spriteTempOutput.cameras = [cameraHud];
+		//
+		//spriteTemp.makeGraphic(1000, 1000, FlxColor.RED);
+		//
+		//spriteTempMask.makeGraphic(1000, 1000, FlxColor.TRANSPARENT);
+		//spriteTempMask.fill(FlxColor.TRANSPARENT);
+		//spriteTempMask.drawPolygon([FlxPoint.weak(0, 0), FlxPoint.weak(intersectionUp.x, 0), FlxPoint.weak(intersectionDown.x, FlxG.height), FlxPoint.weak(0, FlxG.height)], FlxColor.BLACK);
+		//
+		//FlxSpriteUtil.alphaMaskFlxSprite(spriteTemp, spriteTempMask, spriteTempOutput);
+		//
+		//spriteTempOutput.alpha = 0.3;
 	}
-	
-	var camera1MaskSprite:FlxSprite = new FlxSprite(0, 0);
 	
 	function calcViewWidth(camera:FlxCamera):Float
 	{
