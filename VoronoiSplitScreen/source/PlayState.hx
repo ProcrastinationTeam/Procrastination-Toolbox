@@ -438,28 +438,8 @@ class PlayState extends FlxState
 			canvasHud.drawCircle(intersectionRight.x, intersectionRight.y, 10, FlxColor.CYAN);
 		}
 		
-		// Si négatif, joueur rouge à gauche
-		// -90 => 		joueur rouge pile à gauche du joueur bleu
-		// -180/180 => 	joueur rouge pile en dessous du joueur bleu
-		// 90 => 		joueur rouge pile à droite du joueur bleu
-		// 0 => 		joueur rouge pile au dessus du joueur bleu
-		//trace(perpendiculaire.degrees);
-		
-		//if (FlxMath.inBounds(perpendiculaire.degrees, 0, 90)) {
-			//
-		//} else if (FlxMath.inBounds(perpendiculaire.degrees, 90, 180)) {
-			//
-		//} else if (FlxMath.inBounds(perpendiculaire.degrees, -90, 0)) {
-			//
-		//} else if (FlxMath.inBounds(perpendiculaire.degrees, -180, 90)){
-			//
-		//} else {
-			//trace("pas normal !");
-		//}
-		
 		// TODO: pas recalculer tout le temps
 		var dxOverDy:Float = (perpendiculaire.dx / perpendiculaire.dy) / (FlxG.width / FlxG.height);
-		//trace(dxOverDy / (FlxG.width / FlxG.height));
 		
 		player1ZoneMask.fill(FlxColor.TRANSPARENT);
 		player2ZoneMask.fill(FlxColor.TRANSPARENT);
@@ -468,65 +448,59 @@ class PlayState extends FlxState
 		// TODO: vu que ça inverse d'un côté à l'autre, y'a moyen de factoriser
 		if (FlxMath.inBounds(dxOverDy, -1, 1)) {
 			// -1 à 1 => rouge à gauche (ou droite)
+			
+			var leftPolygonPoints:Array<FlxPoint> = [
+				FlxPoint.weak(0, 0), 
+				FlxPoint.weak(intersectionUp.x, 0), 
+				FlxPoint.weak(intersectionDown.x, FlxG.height), 
+				FlxPoint.weak(0, FlxG.height)
+			];
+			
+			var rightPolygonPoints:Array<FlxPoint> = [
+				FlxPoint.weak(intersectionUp.x, 0), 
+				FlxPoint.weak(FlxG.width, 0), 
+				FlxPoint.weak(FlxG.width, FlxG.height), 
+				FlxPoint.weak(intersectionDown.x, FlxG.height)
+			];
+			
 			if (player1Sprite.x < player2Sprite.x) {
 				// rouge à gauche (coin haut gauche et bas gauche)
 				
-				player1ZoneMask.drawPolygon([FlxPoint.weak(0, 0), 
-											FlxPoint.weak(intersectionUp.x, 0), 
-											FlxPoint.weak(intersectionDown.x, FlxG.height), 
-											FlxPoint.weak(0, FlxG.height)], 
-											FlxColor.BLACK);
-											
-				//player2ZoneMask.drawPolygon([FlxPoint.weak(intersectionUp.x, 0), 
-											//FlxPoint.weak(FlxG.width, 0), 
-											//FlxPoint.weak(FlxG.width, FlxG.height), 
-											//FlxPoint.weak(intersectionDown.x, FlxG.height)], 
-											//FlxColor.BLACK);
+				player1ZoneMask.drawPolygon(leftPolygonPoints, FlxColor.BLACK);
+				//player2ZoneMask.drawPolygon(rightPolygonPoints, FlxColor.BLACK);
 			} else {
 				// rouge à droite (coin haut droit et bas droite)
 				
-				player1ZoneMask.drawPolygon([FlxPoint.weak(intersectionUp.x, 0), 
-											FlxPoint.weak(FlxG.width, 0), 
-											FlxPoint.weak(FlxG.width, FlxG.height), 
-											FlxPoint.weak(intersectionDown.x, FlxG.height)], 
-											FlxColor.BLACK);
-											
-				//player2ZoneMask.drawPolygon([FlxPoint.weak(0, 0), 
-											//FlxPoint.weak(intersectionUp.x, 0), 
-											//FlxPoint.weak(intersectionDown.x, FlxG.height), 
-											//FlxPoint.weak(0, FlxG.height)], 
-											//FlxColor.BLACK);
+				player1ZoneMask.drawPolygon(rightPolygonPoints, FlxColor.BLACK);
+				//player2ZoneMask.drawPolygon(leftPolygonPoints, FlxColor.BLACK);
 			}
 		} else {
 			// au dessus ou en dessous => en bas (ou haut)
+			
+			var topPolygonPoints:Array<FlxPoint> = [
+				FlxPoint.weak(0, 0), 
+				FlxPoint.weak(FlxG.width, 0), 
+				FlxPoint.weak(FlxG.width, intersectionRight.y), 
+				FlxPoint.weak(0, intersectionLeft.y)
+			];
+			
+			var bottomPolygonPoints:Array<FlxPoint> = [
+				FlxPoint.weak(0, intersectionLeft.y), 
+				FlxPoint.weak(FlxG.width, intersectionRight.y), 
+				FlxPoint.weak(FlxG.width, FlxG.height), 
+				FlxPoint.weak(0, FlxG.height)
+			];
+			
 			if (player1Sprite.y < player2Sprite.y) {
 				// rouge en haut (coin haut gauche et haut droite)
 				
-				player1ZoneMask.drawPolygon([FlxPoint.weak(0, 0), 
-											FlxPoint.weak(FlxG.width, 0), 
-											FlxPoint.weak(FlxG.width, intersectionRight.y), 
-											FlxPoint.weak(0, intersectionLeft.y)], 
-											FlxColor.BLACK);
-				
-				//player2ZoneMask.drawPolygon([FlxPoint.weak(0, intersectionLeft.y), 
-											//FlxPoint.weak(FlxG.width, intersectionRight.y), 
-											//FlxPoint.weak(FlxG.width, FlxG.height), 
-											//FlxPoint.weak(0, FlxG.height)], 
-											//FlxColor.BLACK);
+				player1ZoneMask.drawPolygon(topPolygonPoints, FlxColor.BLACK);
+				//player2ZoneMask.drawPolygon(bottomPolygonPoints, FlxColor.BLACK);
 			} else {
 				// rouge en bas (coin bas gauche et bas droite)
 				
-				player1ZoneMask.drawPolygon([FlxPoint.weak(0, intersectionLeft.y), 
-											FlxPoint.weak(FlxG.width, intersectionRight.y), 
-											FlxPoint.weak(FlxG.width, FlxG.height), 
-											FlxPoint.weak(0, FlxG.height)], 
-											FlxColor.BLACK);
-				
-				//player2ZoneMask.drawPolygon([FlxPoint.weak(0, 0), 
-											//FlxPoint.weak(FlxG.width, 0), 
-											//FlxPoint.weak(FlxG.width, intersectionRight.y), 
-											//FlxPoint.weak(0, intersectionLeft.y)], 
-											//FlxColor.BLACK);
+				player1ZoneMask.drawPolygon(bottomPolygonPoints, FlxColor.BLACK);
+				//player2ZoneMask.drawPolygon(topPolygonPoints, FlxColor.BLACK);
 			}
 		}
 		
