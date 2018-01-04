@@ -1,10 +1,8 @@
 package;
 
-import flash.display.BitmapData;
 import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.input.FlxPointer;
 import flixel.math.FlxRect;
 import flixel.math.FlxVector;
 import flixel.util.FlxColor;
@@ -13,14 +11,10 @@ import flixel.util.FlxAxes;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.util.FlxGradient;
 import flixel.math.FlxPoint;
-import openfl.display.DisplayObject;
-import openfl.display.LineScaleMode;
-import openfl.geom.Rectangle;
-import sys.io.File;
-import openfl.utils.ByteArray;
-import flixel.addons.util.PNGEncoder;
-import flash.filters.BitmapFilter;
 import flixel.math.FlxMath;
+import openfl.geom.Point;
+import flash.display.BitmapData;
+import openfl.display.BlendMode;
 
 using flixel.util.FlxSpriteUtil;
 
@@ -69,6 +63,15 @@ class PlayState extends FlxState
 	var spriteTempMask : FlxSprite = new FlxSprite();
 	var spriteTempOutput : FlxSprite = new FlxSprite();
 	
+	//
+	var camera1Sprite : FlxSprite;
+	var camera2Sprite : FlxSprite;
+	
+	var mask : FlxSprite;
+	
+	//var maskedCamera1 : FlxCamera;
+	//var maskedCamera2 : FlxCamera;
+	
 	override public function create():Void
 	{
 		super.create();
@@ -96,6 +99,7 @@ class PlayState extends FlxState
 		camera1 = new FlxCamera(0, 0, Std.int(FlxG.width / (2 * zoom)), Std.int(FlxG.height / zoom), zoom);
 		camera1.setScrollBoundsRect(0, 0, FlxG.width, FlxG.height);
 		camera1.follow(player1Sprite);
+		//camera1.visible = false;
 		FlxG.cameras.add(camera1);
 		
 		/////////////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +112,7 @@ class PlayState extends FlxState
 		camera2 = new FlxCamera(halfWidth, 0, Std.int(FlxG.width / (2 * zoom)), Std.int(FlxG.height / zoom), zoom);
 		camera2.setScrollBoundsRect(0, 0, FlxG.width, FlxG.height);
 		camera2.follow(player2Sprite);
+		//camera2.visible = false;
 		FlxG.cameras.add(camera2);
 		
 		cameraHud = new FlxCamera();
@@ -171,6 +176,21 @@ class PlayState extends FlxState
 		player2ZoneFinal.cameras = [camera2Mask];
 		add(player2ZoneFinal);
 		
+		camera1Sprite = new FlxSprite();
+		camera1Sprite.makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, true);
+		camera1Sprite.cameras = [cameraHud]; // TODO: pas sur
+		camera1Sprite.blend = BlendMode.ADD;
+		add(camera1Sprite);
+		
+		camera2Sprite = new FlxSprite();
+		camera2Sprite.makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, true);
+		camera2Sprite.cameras = [cameraHud]; // TODO: pas sur
+		camera2Sprite.blend = BlendMode.ADD;
+		//add(camera2Sprite);
+		
+		mask = new FlxSprite();
+		mask.makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT);
+		
 		//spriteTempOutput.cameras = [cameraHud];
 		//spriteTemp.makeGraphic(FlxG.width, FlxG.height, FlxColor.RED);
 		//spriteTempMask.makeGraphic(FlxG.width, FlxG.height-1, FlxColor.TRANSPARENT);
@@ -185,7 +205,7 @@ class PlayState extends FlxState
 		//canvas.cameras = [cameraDebug];
 		canvasHud.cameras = [cameraHud];
 	}
-		
+	
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
@@ -247,28 +267,27 @@ class PlayState extends FlxState
 			}
 		}
 		
-		
-			//if (distanceBetweenPlayers < maxDistanceBetweenPlayers) {
-				//// 1
-				//camera1.visible = false;
-				//camera2.visible = false;
-				//
-				//cameraBoth.visible = true;
-				//
-				//cameraDebug.visible = false;
-				//
-				//cameraHud.visible = true;
-			//} else {
-				//// 0
-				//camera1.visible = true;
-				//camera2.visible = true;
-				//
-				//cameraBoth.visible = false;
-				//
-				//cameraDebug.visible = false;
-				//
-				//cameraHud.visible = true;
-			//}
+		//if (distanceBetweenPlayers < maxDistanceBetweenPlayers) {
+			//// 1
+			//camera1.visible = false;
+			//camera2.visible = false;
+			//
+			//cameraBoth.visible = true;
+			//
+			//cameraDebug.visible = false;
+			//
+			//cameraHud.visible = true;
+		//} else {
+			//// 0
+			//camera1.visible = true;
+			//camera2.visible = true;
+			//
+			//cameraBoth.visible = false;
+			//
+			//cameraDebug.visible = false;
+			//
+			//cameraHud.visible = true;
+		//}
 		
 		var rectangleCameraBoth:FlxRect = new FlxRect(cameraBoth.scroll.x, cameraBoth.scroll.y, calcViewWidth(cameraBoth), calcViewHeight(cameraBoth));
 		
@@ -322,7 +341,7 @@ class PlayState extends FlxState
 		maxX = camera1.scroll.x + calcViewWidth(camera1) > camera2.scroll.x + calcViewWidth(camera2) 
 			? camera1.scroll.x + calcViewWidth(camera1) 
 			: camera2.scroll.x + calcViewWidth(camera2);
-				
+		
 		maxY = camera1.scroll.y + calcViewHeight(camera1) > camera2.scroll.y + calcViewHeight(camera2)
 			? camera1.scroll.y + calcViewHeight(camera1)
 			: camera2.scroll.y + calcViewHeight(camera2);
@@ -466,13 +485,17 @@ class PlayState extends FlxState
 			if (player1Sprite.x < player2Sprite.x) {
 				// rouge à gauche (coin haut gauche et bas gauche)
 				
-				player1ZoneMask.drawPolygon(leftPolygonPoints, FlxColor.BLACK);
+				//player1ZoneMask.drawPolygon(leftPolygonPoints, FlxColor.BLACK);
 				//player2ZoneMask.drawPolygon(rightPolygonPoints, FlxColor.BLACK);
+				
+				drawCameras(leftPolygonPoints, rightPolygonPoints);
 			} else {
 				// rouge à droite (coin haut droit et bas droite)
 				
-				player1ZoneMask.drawPolygon(rightPolygonPoints, FlxColor.BLACK);
+				//player1ZoneMask.drawPolygon(rightPolygonPoints, FlxColor.BLACK);
 				//player2ZoneMask.drawPolygon(leftPolygonPoints, FlxColor.BLACK);
+				
+				drawCameras(rightPolygonPoints, leftPolygonPoints);
 			}
 		} else {
 			// au dessus ou en dessous => en bas (ou haut)
@@ -494,13 +517,17 @@ class PlayState extends FlxState
 			if (player1Sprite.y < player2Sprite.y) {
 				// rouge en haut (coin haut gauche et haut droite)
 				
-				player1ZoneMask.drawPolygon(topPolygonPoints, FlxColor.BLACK);
+				//player1ZoneMask.drawPolygon(topPolygonPoints, FlxColor.BLACK);
 				//player2ZoneMask.drawPolygon(bottomPolygonPoints, FlxColor.BLACK);
+				
+				drawCameras(topPolygonPoints, bottomPolygonPoints);
 			} else {
 				// rouge en bas (coin bas gauche et bas droite)
 				
-				player1ZoneMask.drawPolygon(bottomPolygonPoints, FlxColor.BLACK);
+				//player1ZoneMask.drawPolygon(bottomPolygonPoints, FlxColor.BLACK);
 				//player2ZoneMask.drawPolygon(topPolygonPoints, FlxColor.BLACK);
+				
+				drawCameras(bottomPolygonPoints, topPolygonPoints);
 			}
 		}
 		
@@ -529,6 +556,51 @@ class PlayState extends FlxState
 		//FlxSpriteUtil.alphaMaskFlxSprite(spriteTemp, spriteTempMask, spriteTempOutput);
 		//
 		//spriteTempOutput.alpha = 0.3;
+	}
+	
+	function drawCameras(player1PolygonPoints:Array<FlxPoint>, player2PolygonPoints:Array<FlxPoint>):Void {
+		var originalPixels:BitmapData = mask.pixels.clone();
+		
+		//
+		//mask.drawPolygon(player1PolygonPoints, FlxColor.BLACK);
+		
+		//var pixels = camera1Sprite.pixels;
+		//var tempSprite = new FlxSprite();
+		//tempSprite.makeGraphic(10, 10, FlxColor.RED);
+		//var pixels = tempSprite.pixels;
+		//
+        //if (FlxG.renderBlit) {
+            //pixels.copyPixels(camera1.buffer, camera1.buffer.rect, new Point());
+		//}
+        //else {
+            //pixels.draw(camera1.canvas);
+		//}
+        //camera1Sprite.alphaMaskFlxSprite(mask, camera1Sprite);
+		//camera1Sprite.alpha = 0.3;
+		//
+		
+		mask.pixels = originalPixels.clone();
+		
+		//
+		mask.drawPolygon(player2PolygonPoints, FlxColor.BLACK);
+		
+		var pixels = camera2Sprite.pixels;
+		//var tempSprite = new FlxSprite();
+		//tempSprite.makeGraphic(10, 10, FlxColor.BLUE);
+		//var pixels = tempSprite.pixels;
+		
+        if (FlxG.renderBlit) {
+            pixels.copyPixels(camera2.buffer, camera2.buffer.rect, new Point());
+		}
+        else {
+            pixels.draw(camera2.canvas);
+		}
+        camera2Sprite.alphaMaskFlxSprite(mask, camera2Sprite);
+		camera2Sprite.alpha = 0.3;
+		//
+		
+		// TODO: garder ?
+		mask.pixels = originalPixels.clone();
 	}
 	
 	function calcViewWidth(camera:FlxCamera):Float
