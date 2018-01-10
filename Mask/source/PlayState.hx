@@ -59,7 +59,7 @@ class PlayState extends FlxState
 
 	var canvasHud : FlxSprite;
 	
-	var cameraScrollBoundsOffset : Float = 50;
+	var cameraScrollBoundsOffset : Float = CAMERA_SIZE+1;
 	
     override public function create():Void
     {
@@ -68,11 +68,11 @@ class PlayState extends FlxState
 		var grid:FlxSprite = FlxGridOverlay.create(16, 16, worldWidth, worldHeight);
 		add(grid);
 		
-		redSquare = new FlxSprite(0, 25);
+		redSquare = new FlxSprite(0, 28);
         redSquare.makeGraphic(16, 16, FlxColor.RED);
         add(redSquare);
 		
-		blueSquare = new FlxSprite(125, 25);
+		blueSquare = new FlxSprite(0, 28);
         blueSquare.makeGraphic(16, 16, FlxColor.BLUE);
         add(blueSquare);
 		
@@ -344,73 +344,55 @@ class PlayState extends FlxState
 			? maskedCamera1.scroll.y + calcViewHeight(maskedCamera1)
 			: maskedCamera2.scroll.y + calcViewHeight(maskedCamera2);
 			
-		maskedCameraBoth.setSize(Std.int(Math.max(maxX - minX, CAMERA_SIZE)), Std.int(Math.max(maxY - minY, CAMERA_SIZE)));
+		maskedCameraBoth.setSize(Std.int(Math.max(maxX - minX, CAMERA_SIZE*2)), Std.int(Math.max(maxY - minY, CAMERA_SIZE*2)));
 		maskedCameraBoth.follow(centerOfPlayers);
 		
 		//trace(maskedCameraBoth.width, maskedCameraBoth.height);
 		
+		
+		///////////////////////////////////////////////////////////////////////////// OH MY GAWH
+		// both
+		var spriteTemp = new FlxSprite(0, 0);
+		spriteTemp.makeGraphic(maskedCameraBoth.width, maskedCameraBoth.height);
+		spriteTemp.pixels.draw(maskedCameraBoth.canvas);
+		
+		var normalizedVector = player1ToPlayer2Vector.normalize();
+		
+		
+		// red
+		// doit y avoir une fonction qui fait ça, du clamp
+		var difX = maskedCamera1.scroll.x - maskedCameraBoth.scroll.x;
+		var difY = maskedCamera1.scroll.y - maskedCameraBoth.scroll.y;
+		
+		var x:Int = Std.int((maskedCamera1.scroll.x < maskedCameraBoth.scroll.x ? 0 : difX) + 50 * normalizedVector.x);
+		var y:Int = Std.int((maskedCamera1.scroll.y < maskedCameraBoth.scroll.y ? 0 : difY) + 50 * normalizedVector.y);
+		var width:Int = Std.int(calcViewWidth(maskedCamera1));
+		var height:Int = Std.int(calcViewHeight(maskedCamera1));
+		var rectangle = new Rectangle(x, y, width, height);
+		
+		//trace(rectangle);
+		
+		var spriteTemp1 = new FlxSprite(0, 0);
+		spriteTemp1.makeGraphic(maskedCameraBoth.width, maskedCameraBoth.height);
+		spriteTemp1.pixels.draw(maskedCameraBoth.canvas);
+		
+		var spriteTempRed = new FlxSprite(0, 0);
+		spriteTempRed.makeGraphic(width, height);
+		spriteTempRed.pixels.copyPixels(spriteTemp1.pixels, rectangle, new Point());
+		
+		
 		if (FlxG.keys.pressed.P) {
-			// both
-			var spriteTemp = new FlxSprite(0, 0);
-			spriteTemp.makeGraphic(maskedCameraBoth.width, maskedCameraBoth.height);
-			spriteTemp.pixels.draw(maskedCameraBoth.canvas);
-			
-			//var png:ByteArray = PNGEncoder.encode(spriteTemp.pixels);
-			//File.saveBytes("d:/both.png", png);
-			
-			var normalizedVactor = player1ToPlayer2Vector.normalize();
-			
-			// red
-			// doit y avoir une fonction qui fait ça, du clamp
-			var difX = maskedCamera1.scroll.x - maskedCameraBoth.scroll.x;
-			var difY = maskedCamera1.scroll.y - maskedCameraBoth.scroll.y;
-			
-			var x = (maskedCamera1.scroll.x < maskedCameraBoth.scroll.x ? 0 : difX) + 75*normalizedVactor.x;
-			var y = (maskedCamera1.scroll.y < maskedCameraBoth.scroll.y ? 0 : difY) + 75*normalizedVactor.y;
-			var width = calcViewWidth(maskedCamera1);
-			var height = calcViewHeight(maskedCamera1);
-			var rectangle = new Rectangle(x, y, width, height);
-			
-			trace(rectangle);
-			
-			var spriteTemp = new FlxSprite(0, 0);
-			spriteTemp.makeGraphic(maskedCameraBoth.width, maskedCameraBoth.height);
-			spriteTemp.pixels.draw(maskedCameraBoth.canvas);
-			
-			var spriteTempRed = new FlxSprite(0, 0);
-			spriteTempRed.makeGraphic(Std.int(width), Std.int(height));
-			spriteTempRed.pixels.copyPixels(spriteTemp.pixels, rectangle, new Point());
+			var png:ByteArray = PNGEncoder.encode(spriteTemp.pixels);
+			File.saveBytes("d:/both.png", png);
 			
 			var png:ByteArray = PNGEncoder.encode(spriteTempRed.pixels);
 			File.saveBytes("d:/red.png", png);
 			
-			// blue
-			// doit y avoir une fonction qui fait ça, du clamp
-			var difX = maskedCamera2.scroll.x - maskedCameraBoth.scroll.x;
-			var difY = maskedCamera2.scroll.y - maskedCameraBoth.scroll.y;
-			
-			var x = (maskedCamera2.scroll.x < maskedCameraBoth.scroll.x ? 0 : difX);
-			var y = (maskedCamera2.scroll.y < maskedCameraBoth.scroll.y ? 0 : difY);
-			var width = calcViewWidth(maskedCamera2);
-			var height = calcViewHeight(maskedCamera2);
-			var rectangle = new Rectangle(x, y, width, height);
-			
-			trace(rectangle);
-			
-			var spriteTemp = new FlxSprite(0, 0);
-			spriteTemp.makeGraphic(maskedCameraBoth.width, maskedCameraBoth.height);
-			spriteTemp.pixels.draw(maskedCameraBoth.canvas);
-			
-			var spriteTempBlue = new FlxSprite(0, 0);
-			spriteTempBlue.makeGraphic(Std.int(width), Std.int(height));
-			spriteTempBlue.pixels.copyPixels(spriteTemp.pixels, rectangle, new Point());
-			
-			var png:ByteArray = PNGEncoder.encode(spriteTempBlue.pixels);
-			File.saveBytes("d:/blue.png", png);
+			//var png:ByteArray = PNGEncoder.encode(spriteTempBlue.pixels);
+			//File.saveBytes("d:/blue.png", png);
 		}
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		//trace(maskedCameraBoth.x, maskedCameraBoth.scroll.x);
-		//trace(maskedCamera1.x, maskedCamera1.scroll.x);
 		
 		//
 		var originalPixels = mask.pixels.clone();
@@ -419,27 +401,57 @@ class PlayState extends FlxState
 		mask.drawPolygon(redPolygon, FlxColor.BLACK);
 		
 		// on pourra se débarasser de cameraSprite1, là c'est juste pour l'afficher 2 fois
+		//cameraSprite1.pixels = spriteTempRed.pixels;
 		var pixels = cameraSprite1.pixels;
 		
         if (FlxG.renderBlit) {
+            //pixels.copyPixels(maskedCamera1.buffer, maskedCamera1.buffer.rect, new Point());
             pixels.copyPixels(maskedCamera1.buffer, maskedCamera1.buffer.rect, new Point());
 		}
         else {
             pixels.draw(maskedCamera1.canvas);
 		}
-		
-		//var truc = new BitmapData(CAMERA_SIZE, CAMERA_SIZE);
-		//truc.copyPixels(pixels, new Rectangle(0, 0, CAMERA_SIZE, CAMERA_SIZE), new Point());
-		//cameraSprite1.pixels = truc;
-		
-        cameraSprite1.alphaMaskFlxSprite(mask, cameraSpriteBoth1);
+		//spriteTempRed.alphaMaskFlxSprite(mask, cameraSpriteBoth1);
+        spriteTempRed.alphaMaskFlxSprite(mask, cameraSpriteBoth1);
 		//
 		
 		mask.pixels = originalPixels.clone();
 		
+		
+		
+		
+		
+		
+		
+		// on le fout ici, sinon ça écrase dans l'autre sprite apparemment
+		// blue
+		// doit y avoir une fonction qui fait ça, du clamp
+		var difX = maskedCamera2.scroll.x - maskedCameraBoth.scroll.x;
+		var difY = maskedCamera2.scroll.y - maskedCameraBoth.scroll.y;
+		
+		var x:Int = Std.int((maskedCamera2.scroll.x < maskedCameraBoth.scroll.x ? 0 : difX) - 50 * normalizedVector.x);
+		var y:Int = Std.int((maskedCamera2.scroll.y < maskedCameraBoth.scroll.y ? 0 : difY) - 50 * normalizedVector.y);
+		var width:Int = Std.int(calcViewWidth(maskedCamera2));
+		var height:Int = Std.int(calcViewHeight(maskedCamera2));
+		var rectangle = new Rectangle(x, y, width, height);
+		
+		//trace(rectangle);
+		
+		var spriteTemp2 = new FlxSprite(0, 0);
+		spriteTemp2.makeGraphic(maskedCameraBoth.width, maskedCameraBoth.height);
+		spriteTemp2.pixels.draw(maskedCameraBoth.canvas);
+		
+		
+		var spriteTempBlue = new FlxSprite(0, 0);
+		spriteTempBlue.makeGraphic(width, height);
+		spriteTempBlue.pixels.copyPixels(spriteTemp2.pixels, rectangle, new Point());
+		
+		
+		
 		//
 		mask.drawPolygon(bluePolygon, FlxColor.BLACK);
 		
+		//cameraSprite2.pixels = spriteTempBlue.pixels;
 		var pixels = cameraSprite2.pixels;
         if (FlxG.renderBlit) {
             pixels.copyPixels(maskedCamera2.buffer, maskedCamera2.buffer.rect, new Point());
@@ -447,7 +459,7 @@ class PlayState extends FlxState
         else {
             pixels.draw(maskedCamera2.canvas);
 		}
-        cameraSprite2.alphaMaskFlxSprite(mask, cameraSpriteBoth2);
+        spriteTempBlue.alphaMaskFlxSprite(mask, cameraSpriteBoth2);
 		//
 		
 		mask.pixels = originalPixels.clone();
