@@ -527,9 +527,30 @@ class PlayState extends FlxState
 		//trace(centerOfPlayers);
 		cameraSpriteCentered.pixels = spriteTempCentered.pixels;
 		
-		//if (player1ToPlayer2Vector.length > 100) {
-			//trace('centered');
-		//}
+		//
+		var limitBeforeSplitting:Float = 20;
+		var centerCameraBoth:FlxPoint = FlxPoint.get(maskedCameraBoth.scroll.x + calcViewWidth(maskedCameraBoth) / 2, maskedCameraBoth.scroll.y + calcViewHeight(maskedCameraBoth) / 2);
+		var rectangleCameraBoth:FlxRect = new FlxRect(
+			centerCameraBoth.x - CAMERA_WIDTH / 2 + limitBeforeSplitting, 
+			centerCameraBoth.y - CAMERA_HEIGHT / 2 + limitBeforeSplitting, 
+			CAMERA_WIDTH - 2 * limitBeforeSplitting, 
+			CAMERA_HEIGHT - 2 * limitBeforeSplitting);
+		
+		//trace(rectangleCameraBoth);
+		
+		if (rectangleCameraBoth.containsPoint(redSquare.getPosition()) && rectangleCameraBoth.containsPoint(blueSquare.getPosition())) {
+			//trace("faut merger madame");
+			cameraSpriteCentered.x = 0;
+			cameraSpriteCentered.y = CAMERA_HEIGHT + 10 + CAMERA_HEIGHT + 10;
+			cameraSpriteBoth1.visible = false;
+			cameraSpriteBoth2.visible = false;
+		} else {
+			//trace("c'est le schiiiiisme");
+			cameraSpriteCentered.x = CAMERA_WIDTH + 10 + CAMERA_WIDTH + 10;
+			cameraSpriteCentered.y = CAMERA_HEIGHT + 10;
+			cameraSpriteBoth1.visible = true;
+			cameraSpriteBoth2.visible = true;
+		}
     }
 	
 	function changeCameraMode():Void {
