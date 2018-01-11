@@ -49,6 +49,7 @@ class PlayState extends FlxState
 	
     var cameraSprite1 					: FlxSprite;
     var cameraSprite2 					: FlxSprite;
+    var cameraSpriteCentered 			: FlxSprite;
 	
     var cameraSpriteBoth1				: FlxSprite;
     var cameraSpriteBoth2				: FlxSprite;
@@ -121,6 +122,12 @@ class PlayState extends FlxState
 		cameraSprite2.blend = BlendMode.ADD;
         add(cameraSprite2);
 		
+		cameraSpriteCentered = new FlxSprite(CAMERA_WIDTH + 10 + CAMERA_WIDTH + 10, CAMERA_HEIGHT + 10);
+        cameraSpriteCentered.makeGraphic(CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT, true);
+        cameraSpriteCentered.cameras = [FlxG.camera];
+		cameraSpriteCentered.blend = BlendMode.ADD;
+        add(cameraSpriteCentered);
+		
 		cameraSpriteBoth1 = new FlxSprite(0, CAMERA_HEIGHT + 10 + CAMERA_HEIGHT + 10);
         cameraSpriteBoth1.makeGraphic(CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT, true);
         cameraSpriteBoth1.cameras = [FlxG.camera];
@@ -146,7 +153,7 @@ class PlayState extends FlxState
 		var canvas = new FlxSprite(0, 0);
 		canvas.makeGraphic(CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT);
 		canvas.blend = BlendMode.ADD;
-		canvas.drawRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT, {thickness: 3, color: FlxColor.WHITE});
+		//canvas.drawRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT, {thickness: 3, color: FlxColor.WHITE});
 		canvas.cameras = [FlxG.camera];
 		add(canvas);
 		
@@ -203,10 +210,9 @@ class PlayState extends FlxState
 		}
 		
 		centerOfPlayers.setPosition(
-			(redSquare.x + blueSquare.x) / 2, 
-			(redSquare.y + blueSquare.y) / 2 
+			(redSquare.x + (redSquare.width / 2) + blueSquare.x + (blueSquare.width / 2)) / 2, 
+			(redSquare.y + (redSquare.height / 2) + blueSquare.y + (blueSquare.height / 2)) / 2 
 		);
-		
 		
 		
 		// Ligne / vecteur du joueur 1 vers le joueur 2
@@ -251,20 +257,26 @@ class PlayState extends FlxState
 			canvasHud.drawCircle(intersectionRight.x, intersectionRight.y, 10, FlxColor.CYAN);
 		}
 		
-		//canvasHud.drawLine(
-			//cameraSpriteBoth1.x + centerOfPlayers.x - perpendiculaire.x*3000, cameraSpriteBoth1.y + centerOfPlayers.y - perpendiculaire.y*3000,
-			//cameraSpriteBoth1.x + centerOfPlayers.x + perpendiculaire.x*3000, cameraSpriteBoth1.y + centerOfPlayers.y + perpendiculaire.y*3000,
-		//{thickness: 2, color:FlxColor.BLACK});
+		//var separationLineThickness:Float = FlxMath.bound(FlxMath.lerp(1, 6, player1ToPlayer2Vector.length / 200), 1, 6);
+		var separationLineThickness:Float = FlxMath.bound(FlxMath.remapToRange(player1ToPlayer2Vector.length, 100, 200, 0, 6), 0, 6);
 		
-		canvasHud.drawLine(
-			intersectionLeft.x, intersectionLeft.y, 
-			intersectionRight.x, intersectionRight.y,
-		{thickness: 2, color:FlxColor.BLACK});
+		//trace(separationLineThickness);
 		
-		canvasHud.drawLine(
-			intersectionUp.x, intersectionUp.y, 
-			intersectionDown.x, intersectionDown.y,
-		{thickness: 2, color:FlxColor.BLACK});
+		if (separationLineThickness != 0) {		
+			if (intersectionLeft.inRect(screenRect) && intersectionRight.inRect(screenRect)) {
+				canvasHud.drawLine(
+					intersectionLeft.x, intersectionLeft.y, 
+					intersectionRight.x, intersectionRight.y,
+				{thickness: separationLineThickness, color:FlxColor.BLACK});
+			}
+			
+			if (intersectionUp.inRect(screenRect) && intersectionDown.inRect(screenRect)) {
+				canvasHud.drawLine(
+					intersectionUp.x, intersectionUp.y, 
+					intersectionDown.x, intersectionDown.y,
+				{thickness: separationLineThickness, color:FlxColor.BLACK});
+			}
+		}
 		
 		// TODO: pas recalculer tout le temps
 		var dxOverDy:Float = (perpendiculaire.dx / perpendiculaire.dy) / (cameraSpriteBoth1.width / cameraSpriteBoth1.height);
@@ -293,12 +305,10 @@ class PlayState extends FlxState
 				// rouge à gauche (coin haut gauche et bas gauche)
 				redPolygon = leftPolygonPoints;
 				bluePolygon = rightPolygonPoints;
-				//drawCameras(leftPolygonPoints, rightPolygonPoints);
 			} else {
 				// rouge à droite (coin haut droit et bas droite)
 				redPolygon = rightPolygonPoints;
 				bluePolygon = leftPolygonPoints;
-				//drawCameras(rightPolygonPoints, leftPolygonPoints);
 			}
 		} else {
 			// au dessus ou en dessous => en bas (ou haut)
@@ -317,18 +327,14 @@ class PlayState extends FlxState
 				FlxPoint.weak(0, 						cameraSpriteBoth1.height)
 			];
 			
-			//trace(topPolygonPoints);
-			
 			if (redSquare.y < blueSquare.y) {
 				// rouge en haut (coin haut gauche et haut droite)
 				redPolygon = topPolygonPoints;
 				bluePolygon = bottomPolygonPoints;
-				//drawCameras(topPolygonPoints, bottomPolygonPoints);
 			} else {
 				// rouge en bas (coin bas gauche et bas droite)
 				redPolygon = bottomPolygonPoints;
 				bluePolygon = topPolygonPoints;
-				//drawCameras(bottomPolygonPoints, topPolygonPoints);
 			}
 		}
 		
@@ -349,8 +355,41 @@ class PlayState extends FlxState
 		maskedCameraBoth.setSize(Std.int(Math.max(maxX - minX, CAMERA_WIDTH*2)), Std.int(Math.max(maxY - minY, CAMERA_HEIGHT*2)));
 		maskedCameraBoth.follow(centerOfPlayers);
 		
-		//trace(maskedCameraBoth.width, maskedCameraBoth.height);
 		
+		var centerScreen:FlxPoint = FlxPoint.get(CAMERA_WIDTH / 2, CAMERA_HEIGHT / 2);
+		// Calcul du centre des écrans splittés pour bien offseter le joueur pour le centrer
+		// https://en.wikipedia.org/wiki/Centroid#Centroid_of_a_polygon
+		var areaRedScreen:Float = 0;
+		var centerRedScreenX:Float = 0;
+		var centerRedScreenY:Float = 0;
+		for (i in 0...4) {
+			areaRedScreen += (redPolygon[i].x * redPolygon[(i + 1) % 4].y) - (redPolygon[(i + 1) % 4].x * redPolygon[i].y);
+			centerRedScreenX += (redPolygon[i].x + redPolygon[(i + 1) % 4].x) * ((redPolygon[i].x * redPolygon[(i + 1) % 4].y) - (redPolygon[(i + 1) % 4].x * redPolygon[i].y));
+			centerRedScreenY += (redPolygon[i].y + redPolygon[(i + 1) % 4].y) * ((redPolygon[i].x * redPolygon[(i + 1) % 4].y) - (redPolygon[(i + 1) % 4].x * redPolygon[i].y));
+		}
+		areaRedScreen /= 2;
+		centerRedScreenX /= 6 * areaRedScreen;
+		centerRedScreenY /= 6 * areaRedScreen;
+		
+		var centerRedScreen:FlxPoint = FlxPoint.get(centerRedScreenX, centerRedScreenY);
+		
+		//
+		var areaBlueScreen:Float = 0;
+		var centerBlueScreenX:Float = 0;
+		var centerBlueScreenY:Float = 0;
+		for (i in 0...4) {
+			areaBlueScreen += (bluePolygon[i].x * bluePolygon[(i + 1) % 4].y) - (bluePolygon[(i + 1) % 4].x * bluePolygon[i].y);
+			centerBlueScreenX += (bluePolygon[i].x + bluePolygon[(i + 1) % 4].x) * ((bluePolygon[i].x * bluePolygon[(i + 1) % 4].y) - (bluePolygon[(i + 1) % 4].x * bluePolygon[i].y));
+			centerBlueScreenY += (bluePolygon[i].y + bluePolygon[(i + 1) % 4].y) * ((bluePolygon[i].x * bluePolygon[(i + 1) % 4].y) - (bluePolygon[(i + 1) % 4].x * bluePolygon[i].y));
+		}
+		areaBlueScreen /= 2;
+		centerBlueScreenX /= 6 * areaBlueScreen;
+		centerBlueScreenY /= 6 * areaBlueScreen;
+		
+		var centerBlueScreen:FlxPoint = FlxPoint.get(centerBlueScreenX, centerBlueScreenY);
+		
+		//canvasHud.drawCircle(centerRedScreen.x, centerRedScreen.y + cameraSpriteBoth1.y, 4, FlxColor.YELLOW);
+		//canvasHud.drawCircle(centerBlueScreen.x, centerBlueScreen.y + cameraSpriteBoth1.y, 4, FlxColor.YELLOW);
 		
 		///////////////////////////////////////////////////////////////////////////// OH MY GAWH
 		// both
@@ -358,7 +397,7 @@ class PlayState extends FlxState
 		spriteTemp.makeGraphic(maskedCameraBoth.width, maskedCameraBoth.height);
 		spriteTemp.pixels.draw(maskedCameraBoth.canvas);
 		
-		var normalizedVector = player1ToPlayer2Vector.normalize();
+		var normalizedVector = FlxVector.get(player1ToPlayer2Vector.x, player1ToPlayer2Vector.y).normalize();
 		
 		
 		// red
@@ -366,8 +405,8 @@ class PlayState extends FlxState
 		var difX = maskedCamera1.scroll.x - maskedCameraBoth.scroll.x;
 		var difY = maskedCamera1.scroll.y - maskedCameraBoth.scroll.y;
 		
-		var x:Int = Std.int((maskedCamera1.scroll.x < maskedCameraBoth.scroll.x ? 0 : difX) + 50 * normalizedVector.x);
-		var y:Int = Std.int((maskedCamera1.scroll.y < maskedCameraBoth.scroll.y ? 0 : difY) + 50 * normalizedVector.y);
+		var x:Int = Std.int((maskedCamera1.scroll.x < maskedCameraBoth.scroll.x ? 0 : difX) - (centerRedScreen.x - centerScreen.x));
+		var y:Int = Std.int((maskedCamera1.scroll.y < maskedCameraBoth.scroll.y ? 0 : difY) - (centerRedScreen.y - centerScreen.y));
 		var width:Int = Std.int(calcViewWidth(maskedCamera1));
 		var height:Int = Std.int(calcViewHeight(maskedCamera1));
 		var rectangle = new Rectangle(x, y, width, height);
@@ -407,7 +446,6 @@ class PlayState extends FlxState
 		var pixels = cameraSprite1.pixels;
 		
         if (FlxG.renderBlit) {
-            //pixels.copyPixels(maskedCamera1.buffer, maskedCamera1.buffer.rect, new Point());
             pixels.copyPixels(maskedCamera1.buffer, maskedCamera1.buffer.rect, new Point());
 		}
         else {
@@ -431,8 +469,8 @@ class PlayState extends FlxState
 		var difX = maskedCamera2.scroll.x - maskedCameraBoth.scroll.x;
 		var difY = maskedCamera2.scroll.y - maskedCameraBoth.scroll.y;
 		
-		var x:Int = Std.int((maskedCamera2.scroll.x < maskedCameraBoth.scroll.x ? 0 : difX) - 50 * normalizedVector.x);
-		var y:Int = Std.int((maskedCamera2.scroll.y < maskedCameraBoth.scroll.y ? 0 : difY) - 50 * normalizedVector.y);
+		var x:Int = Std.int((maskedCamera2.scroll.x < maskedCameraBoth.scroll.x ? 0 : difX) - (centerBlueScreen.x - centerScreen.x));
+		var y:Int = Std.int((maskedCamera2.scroll.y < maskedCameraBoth.scroll.y ? 0 : difY) - (centerBlueScreen.y - centerScreen.y));
 		var width:Int = Std.int(calcViewWidth(maskedCamera2));
 		var height:Int = Std.int(calcViewHeight(maskedCamera2));
 		var rectangle = new Rectangle(x, y, width, height);
@@ -467,11 +505,31 @@ class PlayState extends FlxState
 		mask.pixels = originalPixels.clone();
 		
 		
+		//
+		
+		var x:Int = Std.int((calcViewWidth(maskedCameraBoth) - CAMERA_WIDTH) / 2);
+		var y:Int = Std.int((calcViewHeight(maskedCameraBoth) - CAMERA_HEIGHT) / 2);
+		var width:Int = CAMERA_WIDTH;
+		var height:Int = CAMERA_HEIGHT;
+		var rectangle = new Rectangle(x, y, width, height);
+		
+		//trace(player1ToPlayer2Vector.length);
+		
+		var spriteTemp3 = new FlxSprite(0, 0);
+		spriteTemp3.makeGraphic(maskedCameraBoth.width, maskedCameraBoth.height);
+		spriteTemp3.pixels.draw(maskedCameraBoth.canvas);
 		
 		
+		var spriteTempCentered = new FlxSprite(0, 0);
+		spriteTempCentered.makeGraphic(width, height);
+		spriteTempCentered.pixels.copyPixels(spriteTemp3.pixels, rectangle, new Point());
 		
+		//trace(centerOfPlayers);
+		cameraSpriteCentered.pixels = spriteTempCentered.pixels;
 		
-		
+		//if (player1ToPlayer2Vector.length > 100) {
+			//trace('centered');
+		//}
     }
 	
 	function changeCameraMode():Void {
