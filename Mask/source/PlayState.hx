@@ -29,37 +29,39 @@ enum CameraMode {
 
 class PlayState extends FlxState
 {
-    static inline var CAMERA_SIZE 	: Float 	= 200;
-	static inline var worldWidth 	: Int 		= 10000;
-	static inline var worldHeight 	: Int 		= 10000;
+    static inline var CAMERA_WIDTH 		: Float 	= 320;
+    static inline var CAMERA_HEIGHT 	: Float 	= 180;
 	
-	static inline var speed 		: Float 	= 4;
+	static inline var worldWidth 		: Int 		= 10000;
+	static inline var worldHeight 		: Int 		= 10000;
 	
-	var redSquare 					: FlxSprite;
-	var blueSquare 					: FlxSprite;
+	static inline var speed 			: Float 	= 4;
+	
+	var redSquare 						: FlxSprite;
+	var blueSquare 						: FlxSprite;
 
-    //var maskedCamera 				: FlxCamera;
-    var maskedCamera1 				: FlxCamera;
-    var maskedCamera2 				: FlxCamera;
-	var maskedCameraBoth			: FlxCamera;
+    //var maskedCamera 					: FlxCamera;
+    var maskedCamera1 					: FlxCamera;
+    var maskedCamera2 					: FlxCamera;
+	var maskedCameraBoth				: FlxCamera;
 	
-    var mask 						: FlxSprite;
+    var mask 							: FlxSprite;
 	
-    var cameraSprite1 				: FlxSprite;
-    var cameraSprite2 				: FlxSprite;
+    var cameraSprite1 					: FlxSprite;
+    var cameraSprite2 					: FlxSprite;
 	
-    var cameraSpriteBoth1			: FlxSprite;
-    var cameraSpriteBoth2			: FlxSprite;
+    var cameraSpriteBoth1				: FlxSprite;
+    var cameraSpriteBoth2				: FlxSprite;
 	
 	//var cameraBoth 					: FlxCamera;
 	
-	var cameraMode 					: CameraMode = SEPARATE;
+	var cameraMode 						: CameraMode = SEPARATE;
 	
-	var centerOfPlayers : FlxSprite;
+	var centerOfPlayers 				: FlxSprite;
 
-	var canvasHud : FlxSprite;
+	var canvasHud 						: FlxSprite;
 	
-	var cameraScrollBoundsOffset : Float = CAMERA_SIZE+1;
+	var cameraScrollBoundsOffset 		: Float = CAMERA_WIDTH+1;
 	
     override public function create():Void
     {
@@ -87,19 +89,19 @@ class PlayState extends FlxState
         //maskedCamera.bgColor = FlxColor.GRAY;
         //FlxG.cameras.add(maskedCamera);
 		
-		maskedCamera1 = new FlxCamera(20000, 0, CAMERA_SIZE, CAMERA_SIZE);
+		maskedCamera1 = new FlxCamera(20000, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 		maskedCamera1.setScrollBoundsRect(-cameraScrollBoundsOffset, -cameraScrollBoundsOffset, worldWidth + 2*cameraScrollBoundsOffset, worldWidth + 2*cameraScrollBoundsOffset);
         maskedCamera1.bgColor = FlxColor.GRAY;
 		maskedCamera1.follow(redSquare);
         FlxG.cameras.add(maskedCamera1);
 		
-		maskedCamera2 = new FlxCamera(20000, 0, CAMERA_SIZE, CAMERA_SIZE);
+		maskedCamera2 = new FlxCamera(20000, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 		maskedCamera2.setScrollBoundsRect(-cameraScrollBoundsOffset, -cameraScrollBoundsOffset, worldWidth + 2*cameraScrollBoundsOffset, worldWidth + 2*cameraScrollBoundsOffset);
         maskedCamera2.bgColor = FlxColor.GRAY;
 		maskedCamera2.follow(blueSquare);
         FlxG.cameras.add(maskedCamera2);
 		
-		maskedCameraBoth = new FlxCamera(20000, 0, CAMERA_SIZE, CAMERA_SIZE);
+		maskedCameraBoth = new FlxCamera(20000, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 		maskedCameraBoth.setScrollBoundsRect(-cameraScrollBoundsOffset, -cameraScrollBoundsOffset, worldWidth + 2*cameraScrollBoundsOffset, worldWidth + 2*cameraScrollBoundsOffset);
         maskedCameraBoth.bgColor = FlxColor.GRAY;
 		maskedCameraBoth.follow(centerOfPlayers);
@@ -107,26 +109,26 @@ class PlayState extends FlxState
 		
 		FlxCamera.defaultCameras = [maskedCamera1, maskedCamera2, maskedCameraBoth];
 		
-		cameraSprite1 = new FlxSprite(0, CAMERA_SIZE + 10);
-        cameraSprite1.makeGraphic(CAMERA_SIZE, CAMERA_SIZE, FlxColor.TRANSPARENT, true);
+		cameraSprite1 = new FlxSprite(0, CAMERA_HEIGHT + 10);
+        cameraSprite1.makeGraphic(CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT, true);
         cameraSprite1.cameras = [FlxG.camera];
 		cameraSprite1.blend = BlendMode.ADD;
         add(cameraSprite1);
 		
-		cameraSprite2 = new FlxSprite(CAMERA_SIZE + 10, CAMERA_SIZE + 10);
-        cameraSprite2.makeGraphic(CAMERA_SIZE, CAMERA_SIZE, FlxColor.TRANSPARENT, true);
+		cameraSprite2 = new FlxSprite(CAMERA_WIDTH + 10, CAMERA_HEIGHT + 10);
+        cameraSprite2.makeGraphic(CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT, true);
         cameraSprite2.cameras = [FlxG.camera];
 		cameraSprite2.blend = BlendMode.ADD;
         add(cameraSprite2);
 		
-		cameraSpriteBoth1 = new FlxSprite(0, CAMERA_SIZE + 10 + CAMERA_SIZE + 10);
-        cameraSpriteBoth1.makeGraphic(CAMERA_SIZE, CAMERA_SIZE, FlxColor.TRANSPARENT, true);
+		cameraSpriteBoth1 = new FlxSprite(0, CAMERA_HEIGHT + 10 + CAMERA_HEIGHT + 10);
+        cameraSpriteBoth1.makeGraphic(CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT, true);
         cameraSpriteBoth1.cameras = [FlxG.camera];
 		cameraSpriteBoth1.blend = BlendMode.ADD;
         add(cameraSpriteBoth1);
 		
-		cameraSpriteBoth2 = new FlxSprite(0, CAMERA_SIZE + 10 + CAMERA_SIZE + 10);
-        cameraSpriteBoth2.makeGraphic(CAMERA_SIZE, CAMERA_SIZE, FlxColor.TRANSPARENT, true);
+		cameraSpriteBoth2 = new FlxSprite(0, CAMERA_HEIGHT + 10 + CAMERA_HEIGHT + 10);
+        cameraSpriteBoth2.makeGraphic(CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT, true);
         cameraSpriteBoth2.cameras = [FlxG.camera];
 		cameraSpriteBoth2.blend = BlendMode.ADD;
         add(cameraSpriteBoth2);
@@ -139,12 +141,12 @@ class PlayState extends FlxState
         //FlxG.cameras.add(cameraBoth);
 		
 		mask = new FlxSprite();
-		mask.makeGraphic(CAMERA_SIZE, CAMERA_SIZE, FlxColor.TRANSPARENT);
+		mask.makeGraphic(CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT);
 		
 		var canvas = new FlxSprite(0, 0);
-		canvas.makeGraphic(CAMERA_SIZE, CAMERA_SIZE, FlxColor.TRANSPARENT);
+		canvas.makeGraphic(CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT);
 		canvas.blend = BlendMode.ADD;
-		canvas.drawRect(0, 0, CAMERA_SIZE, CAMERA_SIZE, FlxColor.TRANSPARENT, {thickness: 3, color: FlxColor.WHITE});
+		canvas.drawRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT, FlxColor.TRANSPARENT, {thickness: 3, color: FlxColor.WHITE});
 		canvas.cameras = [FlxG.camera];
 		add(canvas);
 		
@@ -157,15 +159,15 @@ class PlayState extends FlxState
 		circle.makeGraphic(10, 10, FlxColor.PINK);
 		add(circle);
 		
-		var circle = new FlxSprite(25, CAMERA_SIZE - 25);
+		var circle = new FlxSprite(25, CAMERA_HEIGHT - 25);
 		circle.makeGraphic(10, 10, FlxColor.PINK);
 		add(circle);
 		
-		var circle = new FlxSprite(CAMERA_SIZE - 25, 25);
+		var circle = new FlxSprite(CAMERA_WIDTH - 25, 25);
 		circle.makeGraphic(10, 10, FlxColor.PINK);
 		add(circle);
 		
-		var circle = new FlxSprite(CAMERA_SIZE - 25, CAMERA_SIZE - 25);
+		var circle = new FlxSprite(CAMERA_WIDTH - 25, CAMERA_HEIGHT - 25);
 		circle.makeGraphic(10, 10, FlxColor.PINK);
 		add(circle);
     }
@@ -344,7 +346,7 @@ class PlayState extends FlxState
 			? maskedCamera1.scroll.y + calcViewHeight(maskedCamera1)
 			: maskedCamera2.scroll.y + calcViewHeight(maskedCamera2);
 			
-		maskedCameraBoth.setSize(Std.int(Math.max(maxX - minX, CAMERA_SIZE*2)), Std.int(Math.max(maxY - minY, CAMERA_SIZE*2)));
+		maskedCameraBoth.setSize(Std.int(Math.max(maxX - minX, CAMERA_WIDTH*2)), Std.int(Math.max(maxY - minY, CAMERA_HEIGHT*2)));
 		maskedCameraBoth.follow(centerOfPlayers);
 		
 		//trace(maskedCameraBoth.width, maskedCameraBoth.height);
@@ -488,7 +490,7 @@ class PlayState extends FlxState
 				cameraSprite2.visible = true;
 				
 				cameraSprite1.x = 0;
-				cameraSprite2.x = CAMERA_SIZE + 10;
+				cameraSprite2.x = CAMERA_WIDTH + 10;
 				
 				//cameraBoth.visible = false;
 			case CameraMode.OVERLAY:
