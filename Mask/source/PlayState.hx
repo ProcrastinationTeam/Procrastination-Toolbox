@@ -27,6 +27,8 @@ enum CameraMode {
 	GLOBAL;
 }
 
+
+// In addition to the regular mode, there is a "sticky" version where the line snaps vertically and horizontally, which could be useful in racing or side-scrolling games.
 class PlayState extends FlxState
 {
     static inline var CAMERA_WIDTH 		: Float 	= 320;
@@ -67,6 +69,7 @@ class PlayState extends FlxState
     override public function create():Void
     {
         super.create();
+		
 		
 		var grid:FlxSprite = FlxGridOverlay.create(16, 16, worldWidth, worldHeight);
 		add(grid);
@@ -537,7 +540,8 @@ class PlayState extends FlxState
 			CAMERA_HEIGHT - 2 * limitBeforeSplitting);
 		
 		//trace(rectangleCameraBoth);
-		
+		// Vérifier si on est dans le cercle de centre l'autre joueur et placé à côté du centre de son écran (genre même distance ?)
+		// Ou tester la distance j1-j2 si c'est plus que la distance centre / centre du split potentiel
 		if (rectangleCameraBoth.containsPoint(redSquare.getPosition()) && rectangleCameraBoth.containsPoint(blueSquare.getPosition())) {
 			//trace("faut merger madame");
 			cameraSpriteCentered.x = 0;
