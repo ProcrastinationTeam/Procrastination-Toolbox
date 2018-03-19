@@ -13,6 +13,10 @@ class PlayState extends FlxState
 {
 	private var heroSprite : FlxSprite;
 	
+	private var mapGround : FlxTilemap;
+	private var mapObjects : FlxTilemap;
+	private var mapOver : FlxTilemap;
+	
 	override public function create():Void
 	{
 		super.create();
@@ -43,27 +47,26 @@ class PlayState extends FlxState
 		heroSprite.animation.add("normal", [0, 8, 12], 4);
 		heroSprite.animation.play("normal");
 		
-		var mapGround = new FlxTilemap();
+		mapGround = new FlxTilemap();
 		var groundLayer = levelData.layers[0];
-		mapGround.loadMapFromArray(groundLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, groundLayer.data.size, groundLayer.data.size, FlxTilemapAutoTiling.AUTO);
+		mapGround.loadMapFromArray(groundLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, groundLayer.data.size, groundLayer.data.size, FlxTilemapAutoTiling.OFF, 1);
 		
-		var mapObjects = new FlxTilemap();
+		mapObjects = new FlxTilemap();
 		var objectsLayer = levelData.layers[1];
-		mapObjects.loadMapFromArray(objectsLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, objectsLayer.data.size, objectsLayer.data.size, FlxTilemapAutoTiling.AUTO);
+		mapObjects.loadMapFromArray(objectsLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, objectsLayer.data.size, objectsLayer.data.size, FlxTilemapAutoTiling.OFF, 1);
 		
-		
-		var mapOver = new FlxTilemap();
+		mapOver = new FlxTilemap();
 		var overLayer = levelData.layers[2];
-		mapOver.loadMapFromArray(overLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, overLayer.data.size, overLayer.data.size, FlxTilemapAutoTiling.AUTO);
+		mapOver.loadMapFromArray(overLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, overLayer.data.size, overLayer.data.size, FlxTilemapAutoTiling.OFF, 1);
 		
-		//for (layer in levelData.layers) {
-			//trace("name : " + layer.name);
-			//trace("file : " + layer.data.file);
-			//trace("size : " + layer.data.size);
-			//trace("stride : " + layer.data.stride);
-			//trace("data : " + layer.data.data.decode());
-			//trace("");
-		//}
+		for (layer in levelData.layers) {
+			trace("name : " + layer.name);
+			trace("file : " + layer.data.file);
+			trace("size : " + layer.data.size);
+			trace("stride : " + layer.data.stride);
+			trace("data : " + layer.data.data.decode());
+			trace("");
+		}
 		
 		add(mapGround);
 		add(mapObjects);
@@ -86,6 +89,16 @@ class PlayState extends FlxState
 		}
 		if (FlxG.keys.anyJustPressed([D, RIGHT])) {
 			heroSprite.x += 16;
+		}
+		
+		if (FlxG.keys.justPressed.ONE) {
+			mapGround.visible = !mapGround.visible;
+		}
+		if (FlxG.keys.justPressed.TWO) {
+			mapObjects.visible = !mapObjects.visible;
+		}
+		if (FlxG.keys.justPressed.THREE) {
+			mapOver.visible = !mapOver.visible;
 		}
 	}
 }
