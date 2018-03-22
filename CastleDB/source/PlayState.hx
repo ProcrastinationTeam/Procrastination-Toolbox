@@ -39,14 +39,6 @@ class PlayState extends FlxState
 		
 		var levelData:Data.LevelDatas = Data.levelDatas.get(LevelDatasKind.FirstVillage);
 		
-		var heroImage = Data.npcs.get(NpcsKind.Hero).image;
-		heroSprite = new FlxSprite(levelData.npcs[0].x * heroImage.size, levelData.npcs[0].y * heroImage.size);
-		heroSprite.loadGraphic(AssetPaths.chars__png, true, heroImage.size, heroImage.size, true);
-		heroSprite.setFacingFlip(FlxObject.LEFT, false, false);
-		heroSprite.setFacingFlip(FlxObject.RIGHT, true, false);
-		heroSprite.animation.add("normal", [0, 8, 12], 4);
-		heroSprite.animation.play("normal");
-		
 		mapGround = new FlxTilemap();
 		var groundLayer = levelData.layers[0];
 		mapGround.loadMapFromArray(groundLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, groundLayer.data.size, groundLayer.data.size, FlxTilemapAutoTiling.OFF, 1);
@@ -68,10 +60,24 @@ class PlayState extends FlxState
 			trace("");
 		}
 		
+		var heroImage = Data.npcs.get(NpcsKind.Hero).image;
+		heroSprite = new FlxSprite(levelData.npcs[0].x * heroImage.size, levelData.npcs[0].y * heroImage.size);
+		heroSprite.loadGraphic(AssetPaths.chars__png, true, heroImage.size, heroImage.size, true);
+		heroSprite.setFacingFlip(FlxObject.LEFT, false, false);
+		heroSprite.setFacingFlip(FlxObject.RIGHT, true, false);
+		heroSprite.animation.add("normal", [0, 8, 12], 4);
+		heroSprite.animation.play("normal");
+		
+		for (npc in levelData.npcs) {
+			trace(npc);
+		}
+		
 		add(mapGround);
 		add(mapObjects);
 		add(mapOver);
 		add(heroSprite);
+		
+		trace('ohoh');
 	}
 
 	override public function update(elapsed:Float):Void
