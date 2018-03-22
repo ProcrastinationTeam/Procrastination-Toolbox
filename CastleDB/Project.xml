@@ -27,10 +27,13 @@
 
 	<!-- _____________________________ Path Settings ____________________________ -->
 
-	<set name="BUILD_DIR" value="export" />
+	<set name="BUILD_DIR" value="export/debug" if="debug" />
+	<set name="BUILD_DIR" value="export/release" unless="debug" />
+	<!--<assets path="assets/images" type="image" exclude="*.ase|*.psd|OLD-WORK" />-->
+	
 	<classpath name="source" />
 	<assets path="assets" />
-
+	
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />
