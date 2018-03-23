@@ -41,6 +41,10 @@ class PlayState extends FlxState
 			//trace(collide);
 		//}
 		
+		//[DB].[sheet].get([field]).[...]
+		//[DB].[sheet].resolve(["field"]).[...]
+		//[DB].[sheet].all[index].[...]
+		
 		var levelData:Data.LevelDatas = Data.levelDatas.get(LevelDatasKind.FirstVillage);
 		
 		//levelData.props.getLayer("ground").alpha
