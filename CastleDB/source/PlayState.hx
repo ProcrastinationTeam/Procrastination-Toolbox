@@ -1,5 +1,10 @@
 package;
 
+import cdb.Lz4Reader;
+import cdb.Module;
+import cdb.Types.Layer;
+import cdb.Types.TileLayer;
+import cdb.Types.TileLayerData;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import Data;
@@ -11,11 +16,14 @@ import flixel.FlxG;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.addons.tile.FlxTileSpecial;
 import flixel.addons.tile.FlxTilemapExt;
+import flixel.graphics.FlxGraphic;
+import flixel.graphics.frames.FlxFrame;
 
 class PlayState extends FlxState
 {
-	private var heroSprite : FlxSprite;
+	private var player : Player;
 	private var npcSprites : FlxSpriteGroup;
+	private var pickupSprites : FlxSpriteGroup;
 	
 	private var mapGround : FlxTilemapExt;
 	private var mapObjects : FlxTilemapExt;
@@ -36,6 +44,7 @@ class PlayState extends FlxState
 		for (npc in Data.npcs.all) {
 			trace(npc);
 		}
+		//Data.decode(Data.levelDatas.all); // ??
 		//trace("collides :");
 		//for (collide in Data.collides.all) {
 			//trace(collide);
@@ -45,7 +54,21 @@ class PlayState extends FlxState
 		//[DB].[sheet].resolve(["field"]).[...]
 		//[DB].[sheet].all[index].[...]
 		
+		//trace(Data.ItemsKind);
+		trace(Data.items.get(Data.ItemsKind.Sword));
+		trace(Data.items.resolve("Sword"));
+		
+		// Ok
+		trace(Data.items.resolve("Guinea Pig", true));
+		
+		// Would crash because there is no Guinea Pig object (sadly)
+		//trace(Data.items.resolve("Guinea Pig", false));
+		
 		var levelData:Data.LevelDatas = Data.levelDatas.get(LevelDatasKind.FirstVillage);
+		
+		for (layer in levelData.layers) {
+			trace(layer);
+		}
 		
 		//levelData.props.getLayer("ground").alpha
 		//levelData.props.tileSize
@@ -162,13 +185,16 @@ class PlayState extends FlxState
 		for (npc in levelData.npcs) {
 			switch(npc.kind.id) {
 				case Data.NpcsKind.Hero:
-					var hero = Data.npcs.get(Data.NpcsKind.Hero);
-					heroSprite = new FlxSprite(npc.x * hero.image.size, npc.y * hero.image.size);
-					heroSprite.loadGraphic(AssetPaths.chars__png, true, hero.image.size, hero.image.size, true);
-					heroSprite.setFacingFlip(FlxObject.LEFT, false, false);
-					heroSprite.setFacingFlip(FlxObject.RIGHT, true, false);
-					heroSprite.animation.add("normal", [0, 1, 2, 3], 4);
-					heroSprite.animation.play("normal");
+					//var hero = Data.npcs.get(Data.NpcsKind.Hero);
+					//heroSprite = new FlxSprite(npc.x * hero.image.size, npc.y * hero.image.size);
+					//heroSprite.loadGraphic(AssetPaths.chars__png, true, hero.image.size, hero.image.size, true);
+					//heroSprite.setFacingFlip(FlxObject.LEFT, false, false);
+					//heroSprite.setFacingFlip(FlxObject.RIGHT, true, false);
+					//heroSprite.animation.add("normal", [0, 1, 2, 3], 4);
+					//heroSprite.animation.play("normal");
+					
+					player = new Player(npc);
+					
 				case Data.NpcsKind.Finrod:
 					var finrod = Data.npcs.get(Data.NpcsKind.Finrod);
 					var finrodSprite = new FlxSprite(npc.x * finrod.image.size, npc.y * finrod.image.size);
@@ -181,11 +207,28 @@ class PlayState extends FlxState
 			}
 		}
 		
+		pickupSprites = new FlxSpriteGroup();	
+		var pickupsTileset = levelData.props.getTileset(Data.levelDatas, "tO.png");
+		trace(pickupsTileset.stride);
+		for (pickup in levelData.pickups) {
+			var object = Data.pickups.get(pickup.kindId);
+			var sprite:FlxSprite = new FlxSprite(pickup.x * object.image.size, pickup.y * object.image.size);
+			sprite.loadGraphic(AssetPaths.tO__png, true, object.image.size, object.image.size);
+			sprite.animation.add("normal", [object.image.x + object.image.y * pickupsTileset.stride], 1);
+			sprite.animation.play("normal");
+			pickupSprites.add(sprite);
+			//switch(pickup.kind.id) {
+				//case Data.PickupsKind.Coin:
+				//case Data.PickupsKind.Trash:
+			//}
+		}
+		
 		add(mapGround);
 		add(mapObjects);
 		add(mapOver);
-		add(heroSprite);
+		add(pickupSprites);
 		add(npcSprites);
+		add(player);
 	}
 
 	override public function update(elapsed:Float):Void
@@ -193,16 +236,16 @@ class PlayState extends FlxState
 		super.update(elapsed);
 		
 		if (FlxG.keys.anyJustPressed([Z, UP])) {
-			heroSprite.y -= 16;
+			player.y -= 16;
 		}
 		if (FlxG.keys.anyJustPressed([Q, LEFT])) {
-			heroSprite.x -= 16;
+			player.x -= 16;
 		}
 		if (FlxG.keys.anyJustPressed([S, DOWN])) {
-			heroSprite.y += 16;
+			player.y += 16;
 		}
 		if (FlxG.keys.anyJustPressed([D, RIGHT])) {
-			heroSprite.x += 16;
+			player.x += 16;
 		}
 		
 		if (FlxG.keys.justPressed.ONE) {
@@ -213,6 +256,17 @@ class PlayState extends FlxState
 		}
 		if (FlxG.keys.justPressed.THREE) {
 			mapOver.visible = !mapOver.visible;
+		}
+		
+		FlxG.overlap(player, pickupSprites, playerPickup);
+	}
+	
+	private function playerPickup(P:Player, UP:FlxSprite):Void
+	{
+		if (P.alive && P.exists && UP.alive && UP.exists)
+		{
+			UP.kill();
+			P.money++;
 		}
 	}
 }

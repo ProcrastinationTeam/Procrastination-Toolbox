@@ -441,8 +441,8 @@
 					"image": {
 						"file": "chars.png",
 						"size": 16,
-						"x": 1,
-						"y": 0,
+						"x": 0,
+						"y": 2,
 						"width": 2,
 						"height": 2
 					},
@@ -556,6 +556,10 @@
 					"typeStr": "8",
 					"name": "npcs",
 					"display": null
+				},
+				{
+					"typeStr": "8",
+					"name": "pickups"
 				}
 			],
 			"lines": [
@@ -697,7 +701,7 @@
 							"y": 27,
 							"kind": "Finrod",
 							"item": "Apple",
-							"Name": ""
+							"Name": "Connard #2"
 						}
 					],
 					"props": {
@@ -741,6 +745,12 @@
 								"p": {
 									"alpha": 0.47
 								}
+							},
+							{
+								"l": "pickups",
+								"p": {
+									"alpha": 1
+								}
 							}
 						]
 					},
@@ -759,7 +769,19 @@
 						}
 					],
 					"level": "FirstVillage",
-					"group": 0
+					"group": 0,
+					"pickups": [
+						{
+							"x": 21,
+							"y": 23,
+							"kind": "Trash"
+						},
+						{
+							"x": 23,
+							"y": 23,
+							"kind": "Coin"
+						}
+					]
 				},
 				{
 					"width": 25,
@@ -772,7 +794,7 @@
 								"file": "tO.png",
 								"size": 16,
 								"stride": 37,
-								"data": "xwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwJ5A3kDeQN5A3kDeQN5A3kDeQN5A3kDxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAnkDeQN5A3kDeQN9A30DfQN5A3kDeQPHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCeQN5A3kDeQN5A30DfQN9A3kDeQN5A8cCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwJ5A3kDeQN5A3kDeQN5A3kDeQN5A3kDxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwI="
+								"data": "xwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwIAAAAAAAAAAAAAAADHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAgAAAAAAAAAAAAAAAMcCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwJ5A3kDeQN5A3kDeQN5A3kDeQN5A3kDxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAnkDeQN5A3kDeQN9A30DfQN5A3kDeQPHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCeQN5A3kDeQN5A30DfQN9A3kDeQN5A8cCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwJ5A3kDeQN5A3kDeQN5A3kDeQN5A3kDxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwLHAscCxwI="
 							}
 						},
 						{
@@ -842,7 +864,8 @@
 							}
 						]
 					},
-					"level": "TestVillage"
+					"level": "TestVillage",
+					"pickups": []
 				}
 			],
 			"separators": [
@@ -3459,6 +3482,14 @@
 										"borderIn": "grass",
 										"borderOut": "dirt"
 									}
+								},
+								{
+									"x": 5,
+									"y": 6,
+									"w": 1,
+									"h": 1,
+									"t": "object",
+									"opts": {}
 								}
 							],
 							"props": []
@@ -3591,6 +3622,114 @@
 					"name": "hideHero"
 				}
 			]
+		},
+		{
+			"name": "TestList",
+			"columns": [
+				{
+					"typeStr": "0",
+					"name": "id"
+				},
+				{
+					"typeStr": "5:1,2,3,4,5,6",
+					"name": "list"
+				}
+			],
+			"lines": [
+				{
+					"id": "A",
+					"list": 3,
+					"index": 0
+				},
+				{
+					"id": "B",
+					"list": 2,
+					"index": 1
+				}
+			],
+			"separators": [
+				0,
+				1
+			],
+			"props": {
+				"hasGroup": true,
+				"hasIndex": true
+			}
+		},
+		{
+			"name": "levelDatas@pickups",
+			"props": {
+				"hide": true
+			},
+			"separators": [],
+			"lines": [],
+			"columns": [
+				{
+					"typeStr": "6:pickups",
+					"name": "kind"
+				},
+				{
+					"typeStr": "3",
+					"name": "x"
+				},
+				{
+					"typeStr": "3",
+					"name": "y"
+				}
+			]
+		},
+		{
+			"name": "pickups",
+			"columns": [
+				{
+					"typeStr": "0",
+					"name": "id",
+					"display": null
+				},
+				{
+					"typeStr": "1",
+					"name": "name",
+					"display": null
+				},
+				{
+					"typeStr": "14",
+					"name": "image"
+				},
+				{
+					"typeStr": "4",
+					"name": "money"
+				}
+			],
+			"lines": [
+				{
+					"id": "Coin",
+					"name": "Coin",
+					"index": 0,
+					"image": {
+						"file": "tO.png",
+						"size": 16,
+						"x": 32,
+						"y": 3
+					},
+					"money": 1
+				},
+				{
+					"id": "Trash",
+					"name": "Trash",
+					"money": -1,
+					"index": 1,
+					"image": {
+						"file": "tO.png",
+						"size": 16,
+						"x": 34,
+						"y": 3
+					}
+				}
+			],
+			"separators": [],
+			"props": {
+				"hasIndex": true
+			}
 		}
 	],
 	"customTypes": [
