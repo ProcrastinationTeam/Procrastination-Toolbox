@@ -1,24 +1,5 @@
 package;
 
-import cdb.Lz4Reader;
-import cdb.Module;
-import cdb.Types.Layer;
-import cdb.Types.TileLayer;
-import cdb.Types.TileLayerData;
-import flixel.FlxSprite;
-import flixel.FlxState;
-import Data;
-import flixel.group.FlxSpriteGroup;
-import flixel.tile.FlxTilemap;
-import sys.io.File;
-import flixel.FlxObject;
-import flixel.FlxG;
-import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
-import flixel.addons.tile.FlxTileSpecial;
-import flixel.addons.tile.FlxTilemapExt;
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxFrame;
-
 class PlayState extends FlxState
 {
 	private var player : Player;

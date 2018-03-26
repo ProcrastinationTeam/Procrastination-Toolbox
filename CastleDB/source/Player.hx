@@ -1,6 +1,4 @@
 package;
-import flixel.FlxSprite;
-import flixel.FlxObject;
 
 class Player extends FlxSprite
 {
