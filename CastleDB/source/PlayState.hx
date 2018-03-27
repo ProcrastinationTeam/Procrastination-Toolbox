@@ -1,4 +1,25 @@
 package;
+import cdb.TileBuilder;
+import cdb.Types.LevelPropsAccess;
+import cdb.Types.TilePos;
+
+//var jdffdgdfg:cdb.Data.TilesetProps;
+
+//var tileBuilder:TileBuilder = new TileBuilder(tileSetProps, stride, total);
+//var ground:Array<Int> = tileBuilder.buildGrounds(input, width);
+
+//Data.decode(Data.levelDatas.all); // ?? cf issue
+
+
+// TODO: Ajouter à castle direct celui là ?
+typedef Set = {
+	var x : Int;
+	var y : Int;
+	var w : Int;
+	var h : Int;
+	var t : cdb.Data.TileMode;
+	var opts : cdb.Data.TileModeOptions;
+}
 
 class PlayState extends FlxState
 {
@@ -25,11 +46,10 @@ class PlayState extends FlxState
 		for (npc in Data.npcs.all) {
 			trace(npc);
 		}
-		//Data.decode(Data.levelDatas.all); // ??
-		//trace("collides :");
-		//for (collide in Data.collides.all) {
-			//trace(collide);
-		//}
+		trace("collides :");
+		for (collide in Data.collides.all) {
+			trace(collide);
+		}
 		
 		//[DB].[sheet].get([field]).[...]
 		//[DB].[sheet].resolve(["field"]).[...]
@@ -42,7 +62,7 @@ class PlayState extends FlxState
 		// Ok
 		trace(Data.items.resolve("Guinea Pig", true));
 		
-		// Would crash because there is no Guinea Pig object (sadly)
+		// Would crash because there is no "Guinea Pig" object (sadly)
 		//trace(Data.items.resolve("Guinea Pig", false));
 		
 		var levelData:Data.LevelDatas = Data.levelDatas.get(LevelDatasKind.FirstVillage);
@@ -55,23 +75,34 @@ class PlayState extends FlxState
 		//levelData.props.tileSize
 		var forestTileset = levelData.props.getTileset(Data.levelDatas, "forest.png");
 		trace(forestTileset.stride);
-		//for (prop in forestTileset.props) {
-			//trace(prop);
-		//}
+		
+		var mapOfProps:Map<Int, Dynamic> = new Map<Int, Dynamic>();
+		for (i in 0...forestTileset.props.length) {
+			var prop:Dynamic = forestTileset.props[i];
+			if (prop != null) {
+				mapOfProps[i] = prop;
+			}
+		}
+		for (key in mapOfProps.keys()) {
+			trace('$key => ${mapOfProps[key]}');
+		}
 		//trace(forestTileset.props.length);
 		//trace(forestTileset.sets.length);
 		
-		// TODO: trouver un moyen de pas mettre Dynamic
-		var mapOfObjects:Map<Int, Dynamic> = new Map<Int, Dynamic>();
+		//Data.collides.all
+		//Data.levelDatas.get().collide.
+		//var ertert:Layer<Collides>;
+		
+		var mapOfObjects:Map<Int, Set> = new Map<Int, Set>();
+		
+		//trace("sets:");
+		//trace(levelData.collide.decode());
 		for (set in forestTileset.sets) {
-			//trace(set);
+			trace(set);
 			switch(set.t) {
 				case object:
-					var potentialId = (set.y * forestTileset.stride) + set.x;
-					if (potentialId == 240) {
-						trace(set);
-					}
-					mapOfObjects[potentialId] = set;
+					var computedId = (set.y * forestTileset.stride) + set.x;
+					mapOfObjects[computedId] = set;
 				case border:
 					//
 				case group:
@@ -125,7 +156,7 @@ class PlayState extends FlxState
 			//objectsDataMap[x + y * levelData.width] = id;
 			
 			// TODO: prendre en compte rotation/flip
-			var set:Dynamic = mapOfObjects[id];
+			var set:Set = mapOfObjects[id];
 			if (set != null) {
 				for (dy in 0...set.h) {
 					for (dx in 0...set.w) {
@@ -139,10 +170,9 @@ class PlayState extends FlxState
 			// TEMP
 			
 			if (rotate != 0 || flip) {
-				var x = new FlxTileSpecial(id, flip, false, rotate);
-				specialTiles.push(x);
+				var xx = new FlxTileSpecial(id, flip, false, rotate);
+				specialTiles.push(xx);
 			}
-			
 		}
 		trace(objectsDataMap);
 		mapObjects.loadMapFromArray(objectsDataMap, levelData.width, levelData.height, AssetPaths.forest__png, objectsLayer.data.size, objectsLayer.data.size, FlxTilemapAutoTiling.OFF, 0);
