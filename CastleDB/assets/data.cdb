@@ -966,7 +966,8 @@
 									"h": 3,
 									"t": "border",
 									"opts": {
-										"borderOut": "dirt"
+										"borderOut": "dirt",
+										"borderIn": "upper"
 									}
 								},
 								{
@@ -976,7 +977,8 @@
 									"h": 3,
 									"t": "border",
 									"opts": {
-										"borderIn": "foam"
+										"borderIn": "foam",
+										"borderOut": "lower"
 									}
 								},
 								{
@@ -2071,7 +2073,8 @@
 									"h": 3,
 									"t": "border",
 									"opts": {
-										"borderOut": "stone"
+										"borderOut": "stone",
+										"borderIn": "upper"
 									}
 								},
 								{

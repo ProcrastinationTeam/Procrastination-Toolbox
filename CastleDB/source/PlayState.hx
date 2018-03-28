@@ -102,6 +102,32 @@ class PlayState extends FlxState
 		add(pickupSprites);
 		add(npcSprites);
 		add(player);
+		
+		
+		
+		
+		
+		
+		// Ca marche si on remplace certains upper/lower qui disparaissent
+		trace(forestTileset);
+		trace(forestTileset.props.length);
+		trace(forestTileset.sets.length);
+		var tileBuilder:TileBuilder = new TileBuilder(forestTileset, 16, 624);
+		var ground:Array<Int> = tileBuilder.buildGrounds(levelData.layers[0].data.data.decode(), 50);
+		trace(ground);
+		
+		var ground2 = [for (i in 0...(levelData.width * levelData.height)) 0];
+		var number:Int = Std.int(ground.length / 3);
+		for (i in 0...number) {
+			var xValue = ground[3*i];
+			var yValue = ground[3*i + 1];
+			var idValue = ground[3 * i + 2];
+			
+			ground2[xValue + (yValue * levelData.width)] = idValue;
+		}
+		var mapObjectss:FlxTilemapExt = new FlxTilemapExt();
+		mapObjectss.loadMapFromArray(ground2, levelData.width, levelData.height, AssetPaths.forest__png, 16, 16, FlxTilemapAutoTiling.OFF, 0);
+		add(mapObjectss);
 	}
 
 	override public function update(elapsed:Float):Void
