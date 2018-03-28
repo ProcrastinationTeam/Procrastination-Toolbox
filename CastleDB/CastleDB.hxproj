@@ -21,7 +21,7 @@
     <class path="C:\HaxeToolkit4\haxe\lib\lime\2,9,1" />
     <class path="C:\HaxeToolkit4\haxe\lib\hscript\2,1,1" />
     <class path="C:\HaxeToolkit4\haxe\lib\flixel-addons\2,5,0" />
-    <class path="C:\HaxeToolkit4\haxe\lib\castle\1,5,0" />
+    <class path="C:\HaxeToolkit4\haxe\lib\castle\git" />
     <class path="source" />
     <class path="C:\HaxeToolkit4\haxe\lib\openfl\3,6,1\extern" />
     <class path="export\debug\windows\neko\haxe" />
