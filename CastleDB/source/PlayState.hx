@@ -1,4 +1,6 @@
 package;
+import cdb.Data.LayerMode;
+import flixel.group.FlxGroup;
 
 //var jdffdgdfg:cdb.Data.TilesetProps;
 
@@ -24,17 +26,21 @@ typedef Set = {
 class PlayState extends FlxState
 {
 	private var player 				: Player;
-	private var npcSprites 			: FlxSpriteGroup			= new FlxSpriteGroup();
-	private var pickupSprites 		: FlxSpriteGroup			= new FlxSpriteGroup();
+	private var npcSprites 			: FlxSpriteGroup				= new FlxSpriteGroup();
+	private var pickupSprites 		: FlxSpriteGroup				= new FlxSpriteGroup();
 	
-	private var mapGround 			: FlxTilemapExt				= new FlxTilemapExt();
-	private var mapObjects 			: FlxTilemapExt				= new FlxTilemapExt();
-	private var mapOver 			: FlxTilemapExt				= new FlxTilemapExt();
+	private var mapGround			: FlxTilemap					= new FlxTilemap();
+	private var mapsGroundBorders	: FlxTypedGroup<FlxTilemap>		= new FlxTypedGroup<FlxTilemap>();
+	private var mapObjects 			: FlxTilemapExt					= new FlxTilemapExt();
+	private var mapOver 			: FlxTilemap					= new FlxTilemap();
 	
-	private var maps				: Array<FlxTilemapExt>		= new Array<FlxTilemapExt>();
+	private var mapOfObjects		: Map<Int, Set> 				= new Map<Int, Set>();
+	private var mapOfProps			: Map<Int, Dynamic> 			= new Map<Int, Dynamic>();
 	
-	private var mapOfObjects		: Map<Int, Set> 			= new Map<Int, Set>();
-	private var mapOfProps			: Map<Int, Dynamic> 		= new Map<Int, Dynamic>();
+	// Depending on your map, this can impact the performances quite a lot
+	// (With FlxTileMap as of March 2018, as far a I know)
+	private static inline var ENABLE_MULTIPLE_GROUND_BORDER_TILEMAPS 	: Bool 	= true;
+	private static inline var MAX_NUMBER_OF_GROUND_BORDER_TILEMAPS 		: Int 	= 20;
 	
 	override public function create():Void
 	{
@@ -91,43 +97,40 @@ class PlayState extends FlxState
 		computeMapOfProps(forestTileset);
 		computeMapOfObjects(forestTileset);
 		
+		// Process layers (ground and borders, objects, tiles)
 		processLayers(levelData);
-		processObjectLayer(levelData, levelData.layers[1]);
+		
+		// Process npcs (and player)
 		processNpcs(levelData.npcs);
+		
+		// Process pickups
 		processPickups(levelData.pickups);
 		
+		//////////////////////////////////////// Add all the layers in the right order
+		// First "simple" ground tiles
 		add(mapGround);
+		
+		// Then borders (autotiling)
+		// OLD
+		//add(mapGroundBorders);
+		
+		// NEW
+		add(mapsGroundBorders);
+		
+		// Then objects (mostly non interactive doodads like trees, rocks, etc)
 		add(mapObjects);
+		
+		// Then the over layer (top of trees and cliffs ?)
 		add(mapOver);
+		
+		// Then the pickups (custom layer)
 		add(pickupSprites);
+		
+		// The npcs
 		add(npcSprites);
+		
+		// And finally the player
 		add(player);
-		
-		
-		
-		
-		
-		
-		// Ca marche si on remplace certains upper/lower qui disparaissent
-		trace(forestTileset);
-		trace(forestTileset.props.length);
-		trace(forestTileset.sets.length);
-		var tileBuilder:TileBuilder = new TileBuilder(forestTileset, 16, 624);
-		var ground:Array<Int> = tileBuilder.buildGrounds(levelData.layers[0].data.data.decode(), 50);
-		trace(ground);
-		
-		var ground2 = [for (i in 0...(levelData.width * levelData.height)) 0];
-		var number:Int = Std.int(ground.length / 3);
-		for (i in 0...number) {
-			var xValue = ground[3*i];
-			var yValue = ground[3*i + 1];
-			var idValue = ground[3 * i + 2];
-			
-			ground2[xValue + (yValue * levelData.width)] = idValue;
-		}
-		var mapObjectss:FlxTilemapExt = new FlxTilemapExt();
-		mapObjectss.loadMapFromArray(ground2, levelData.width, levelData.height, AssetPaths.forest__png, 16, 16, FlxTilemapAutoTiling.OFF, 0);
-		add(mapObjectss);
 	}
 
 	override public function update(elapsed:Float):Void
@@ -148,7 +151,11 @@ class PlayState extends FlxState
 		}
 		
 		if (FlxG.keys.justPressed.ONE) {
-			mapGround.visible = !mapGround.visible;
+			if (FlxG.keys.pressed.SHIFT) {
+				mapsGroundBorders.visible = !mapsGroundBorders.visible;
+			} else {
+				mapGround.visible = !mapGround.visible;
+			}
 		}
 		if (FlxG.keys.justPressed.TWO) {
 			mapObjects.visible = !mapObjects.visible;
@@ -198,79 +205,170 @@ class PlayState extends FlxState
 	
 	private function processLayers(levelData:Data.LevelDatas):Void {
 		for (layer in levelData.layers) {
-			// Soit décoder et regarder le premier élément si c'est 0xFFFF, soit regarder dans levelData.props.l == layer.name => si p.mode && p.mode == "object"
 			
+			// Process the layer depending on the layer mode
+			var mode:LayerMode = levelData.props.getLayer(layer.name).mode;
+			switch(mode) {
+				case LayerMode.Ground:
+					trace('${layer.name}: Ground');
+					processGroundLayer(layer, levelData);
+				case LayerMode.Objects:
+					trace('${layer.name}: Objects');
+					processObjectLayer(layer, levelData);
+				case LayerMode.Tiles:
+					trace('${layer.name}: Tiles');
+					// Never reached ? Tiles by default
+				default:
+					trace('${layer.name}: Default, probably Tiles');
+					// TODO: Make generic
+					processTileLayer(layer, levelData, mapOver);
+			}
 		}
-		var groundLayer = levelData.layers[0];
-		mapGround.loadMapFromArray(groundLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, groundLayer.data.size, groundLayer.data.size, FlxTilemapAutoTiling.OFF, 1);
-		
-		var overLayer = levelData.layers[2];
-		mapOver.loadMapFromArray(overLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, overLayer.data.size, overLayer.data.size, FlxTilemapAutoTiling.OFF, 1);
 	}
 	
-	private function processObjectLayer(levelData:Data.LevelDatas, layer: Data.LevelDatas_layers ):Void {
-		var objectsLayer = layer;
-		var objectsDataMap = [for (i in 0...(levelData.width * levelData.height)) 0];
+	private function processTileLayer(tileLayer: Data.LevelDatas_layers, levelData:Data.LevelDatas, tilemap:FlxTilemap):Void {
+		tilemap.loadMapFromArray(tileLayer.data.data.decode(), levelData.width, levelData.height, "assets/" + tileLayer.data.file, tileLayer.data.size, tileLayer.data.size, FlxTilemapAutoTiling.OFF, 1);
+	}
+	
+	private function processGroundLayer(groundLayer: Data.LevelDatas_layers, levelData:Data.LevelDatas):Void {
+		// Simple ground
+		processTileLayer(groundLayer, levelData, mapGround);
 		
-		// TODO: le faire pour d'autres si on détecte le 65535
+		// Borders
+		var tileset = levelData.props.getTileset(Data.levelDatas, groundLayer.data.file);
+		
+		// TODO:
+		// total argument seems useless, 624 in cdb (???), works for any value
+		// at the end, groundMap.length = max(483, total+1)
+		// (total number of tiles ? last tile id ?
+		
+		// /!\ This tileBuilder doesn't work the same as the Flixel one, it blends different tiles together /!\ 
+		// There is not always a single tile per coordinate
+		// (Comments in git/cdb/TileBuilder.hx laptop)
+		
+		var tileBuilder:TileBuilder = new TileBuilder(tileset, groundLayer.data.stride, 0);
+		var groundMapArray:Array<Int> = tileBuilder.buildGrounds(groundLayer.data.data.decode(), levelData.width);
+		
+		// TODO: array comprehension like above ?
+		var groundBordersMapsData:Array<Array<Int>> = new Array<Array<Int>>();
+		
+		// TODO: perfs
+		// Create 4 tilemaps by default, more on the fly if needed
+		for (i in 0...(ENABLE_MULTIPLE_GROUND_BORDER_TILEMAPS ? 4 : 1)) {
+			var tempArray:Array<Int> = [for (i in 0...(levelData.width * levelData.height)) 0];
+			groundBordersMapsData.push(tempArray);
+		}
+		
+		var number:Int = Std.int(groundMapArray.length / 3);
+		for (i in 0...number) {
+			var x = groundMapArray[3*i];
+			var y = groundMapArray[3*i + 1];
+			var id = groundMapArray[3 * i + 2];
+			
+			var position = x + (y * levelData.width);
+			
+			// To check if the tile has been added
+			var added:Bool = false;
+			
+			for (tempArray in groundBordersMapsData) {
+				if (tempArray[position] == 0) {
+					tempArray[position] = id;
+					added = true;
+					break;
+				}
+			}
+			
+			if (ENABLE_MULTIPLE_GROUND_BORDER_TILEMAPS && groundBordersMapsData.length < MAX_NUMBER_OF_GROUND_BORDER_TILEMAPS) {
+				// If all the current tilemaps already contain something in the specified location, create a new one
+				if (!added) {
+					var tempArray:Array<Int> = [for (i in 0...(levelData.width * levelData.height)) 0];
+					tempArray[position] = id;
+					groundBordersMapsData.push(tempArray);
+				}
+			}
+		}
+		
+		trace(groundBordersMapsData.length);
+		for (i in 0...groundBordersMapsData.length) {
+			var groundBordersMapData:Array<Int> = groundBordersMapsData[i];
+			var mapGroundBorders:FlxTilemap = new FlxTilemap();
+			mapGroundBorders.loadMapFromArray(groundBordersMapData, levelData.width, levelData.height, "assets/" + groundLayer.data.file, groundLayer.data.size, groundLayer.data.size);			
+			mapsGroundBorders.add(mapGroundBorders);
+		}
+	}
+	
+	private function processObjectLayer(objectsLayer: Data.LevelDatas_layers, levelData:Data.LevelDatas):Void {
+		var objectsDataMap:Array<Int> = [for (i in 0...(levelData.width * levelData.height)) 0];
+		
+		var tileset = levelData.props.getTileset(Data.levelDatas, objectsLayer.data.file);
+		
 		// TODO: supporter la superposition
 		var objectsArray:Array<Int> = objectsLayer.data.data.decode();
 		
-		// On enlève le 65535
+		// Removing the leading 0xFFFF value
 		objectsArray.shift();
+		
+		// Since there are 3 fields per objects (x, y, id), there are length/3 objects
 		var numberOfObjects:Int = Std.int(objectsArray.length / 3);
-		var specialTiles:Array<FlxTileSpecial> = new Array<FlxTileSpecial>();
+		
+		// TODO:
+		// For rotated/flipped/animated tiles
+		//var specialTiles:Array<FlxTileSpecial> = new Array<FlxTileSpecial>();
+		
 		for (i in 0...numberOfObjects) {
 			var xValue = objectsArray[3*i];
 			var yValue = objectsArray[3*i + 1];
 			var idValue = objectsArray[3*i + 2];
 			
-			// TODO: prendre en compte que ça peut être un float
-			// ((xValue & ((1 << 15) - 1)) => ou binaire entre 0111 111 et la valeur, pour ne pas tenir compte du bit de poids fort qui sert de flag
-			// / 16 parce que c'est en pixel et qu'on veut en tile
-			var x:Int = Std.int((xValue & ((1 << 15) - 1)) / 16); // TODO: groundLayer.data.size ?
-			var y:Int = Std.int((yValue & ((1 << 15) - 1)) / 16); // TODO: groundLayer.data.size ?
-			var id:Int = idValue & ((1 << 15) - 1); // TODO: +1 ?
+			// TODO: x and y can actually be Floats
+			// This just extracts the actual value (in pixel, not tile), ignoring the optional higher bit
+			var x:Int = Std.int((xValue & ((1 << 15) - 1)) / objectsLayer.data.size);
+			var y:Int = Std.int((yValue & ((1 << 15) - 1)) / objectsLayer.data.size);
+			var id:Int = idValue & ((1 << 15) - 1);
 			
-			var rotate90:Bool = xValue | (1 << 15) == 1 << 15;
-			var rotate180:Bool = yValue | (1 << 15) == 1 << 15;
-			var flip:Bool = idValue | (1 << 15) == 1 << 15;
+			// These just check if the higher bit is set
+			// TODO: Optimize ?
+			// +90° rotation flag is encoded into the higher bit
+			var rotate90:Bool = (xValue | (1 << 15)) == 1 << 15;
 			
-			var rotate:Int = (rotate90 ? 1 : 0) + (rotate180 ? 2 : 0);
+			// +180° rotation flag is encoded into the higher bit
+			var rotate180:Bool = (yValue | (1 << 15)) == 1 << 15;
 			
-			// TEMP
-			//objectsArray[3*i] = x;
-			//objectsArray[3*i + 1] = y;
-			//objectsArray[3 * i + 2] = id;
-			//objectsDataMap[x + y * levelData.width] = id;
+			// Horizontal flip flag is encoded into the higher bit
+			var flip:Bool = (idValue | (1 << 15)) == 1 << 15;
 			
-			// TODO: prendre en compte rotation/flip
+			// Final rotation
+			var rotation:Int = (rotate90 ? 1 : 0) + (rotate180 ? 2 : 0);
+			
+			// Sets all the tiles of the object (if width > 1 || height > 1)
 			var set:Set = mapOfObjects[id];
 			if (set != null) {
 				for (dy in 0...set.h) {
 					for (dx in 0...set.w) {
 						var tempX:Int = x + dx;
 						var tempY:Int = y + dy;
-						var tempId:Int = id + dx + (16 * dy);
+						var tempId:Int = id + dx + (tileset.stride * dy);
 						objectsDataMap[tempX + (tempY * levelData.width)] = tempId;
 					}
 				}
+			} else {
+				// TODO:
 			}
-			// TEMP
 			
-			if (rotate != 0 || flip) {
-				var xx = new FlxTileSpecial(id, flip, false, rotate);
-				specialTiles.push(xx);
-			}
+			// TODO: Take rotation/flip/animation in account
+			//if (rotation != 0 || flip) {
+				//var specialTile = new FlxTileSpecial(id, flip, false, rotation);
+				//specialTiles.push(specialTile);
+			//}
 		}
 		trace(objectsDataMap);
-		mapObjects.loadMapFromArray(objectsDataMap, levelData.width, levelData.height, AssetPaths.forest__png, objectsLayer.data.size, objectsLayer.data.size, FlxTilemapAutoTiling.OFF, 0);
-		mapObjects.setSpecialTiles(specialTiles);
+		mapObjects.loadMapFromArray(objectsDataMap, levelData.width, levelData.height, "assets/" + objectsLayer.data.file, objectsLayer.data.size, objectsLayer.data.size, FlxTilemapAutoTiling.OFF, 0);
+		//mapObjects.setSpecialTiles(specialTiles);
 	}
 	
 	private function computeMapOfObjects(tileset:cdb.Data.TilesetProps): Void {
 		for (set in tileset.sets) {
-			trace(set);
+			//trace(set);
 			switch(set.t) {
 				case object:
 					var computedId = (set.y * tileset.stride) + set.x;
@@ -295,7 +393,7 @@ class PlayState extends FlxState
 			}
 		}
 		for (key in mapOfProps.keys()) {
-			trace('$key => ${mapOfProps[key]}');
+			//trace('$key => ${mapOfProps[key]}');
 		}
 	}
 	
