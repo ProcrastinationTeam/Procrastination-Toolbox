@@ -1,7 +1,4 @@
 package;
-import cdb.TileBuilder;
-import cdb.Types.LevelPropsAccess;
-import cdb.Types.TilePos;
 
 //var jdffdgdfg:cdb.Data.TilesetProps;
 
@@ -10,6 +7,9 @@ import cdb.Types.TilePos;
 
 //Data.decode(Data.levelDatas.all); // ?? cf issue
 
+//[DB].[sheet].get([field]).[...]
+//[DB].[sheet].resolve(["field"]).[...]
+//[DB].[sheet].all[index].[...]
 
 // TODO: Ajouter à castle direct celui là ?
 typedef Set = {
@@ -23,105 +23,168 @@ typedef Set = {
 
 class PlayState extends FlxState
 {
-	private var player : Player;
-	private var npcSprites : FlxSpriteGroup;
-	private var pickupSprites : FlxSpriteGroup;
+	private var player 				: Player;
+	private var npcSprites 			: FlxSpriteGroup			= new FlxSpriteGroup();
+	private var pickupSprites 		: FlxSpriteGroup			= new FlxSpriteGroup();
 	
-	private var mapGround : FlxTilemapExt;
-	private var mapObjects : FlxTilemapExt;
-	private var mapOver : FlxTilemapExt;
+	private var mapGround 			: FlxTilemapExt				= new FlxTilemapExt();
+	private var mapObjects 			: FlxTilemapExt				= new FlxTilemapExt();
+	private var mapOver 			: FlxTilemapExt				= new FlxTilemapExt();
+	
+	private var maps				: Array<FlxTilemapExt>		= new Array<FlxTilemapExt>();
+	
+	private var mapOfObjects		: Map<Int, Set> 			= new Map<Int, Set>();
+	private var mapOfProps			: Map<Int, Dynamic> 		= new Map<Int, Dynamic>();
 	
 	override public function create():Void
 	{
 		super.create();
 		
+		// Init cdb
 		var content:String = File.getContent(AssetPaths.data__cdb);
 		Data.load(content);
 		
-		trace("items : ");
-		for (item in Data.items.all) {
-			trace(item);
-		}
-		trace("npcs : ");
-		for (npc in Data.npcs.all) {
-			trace(npc);
-		}
-		trace("collides :");
-		for (collide in Data.collides.all) {
-			trace(collide);
-		}
-		
-		//[DB].[sheet].get([field]).[...]
-		//[DB].[sheet].resolve(["field"]).[...]
-		//[DB].[sheet].all[index].[...]
-		
-		//trace(Data.ItemsKind);
-		trace(Data.items.get(Data.ItemsKind.Sword));
-		trace(Data.items.resolve("Sword"));
-		
-		// Ok
-		trace(Data.items.resolve("Guinea Pig", true));
-		
-		// Would crash because there is no "Guinea Pig" object (sadly)
-		//trace(Data.items.resolve("Guinea Pig", false));
-		
 		var levelData:Data.LevelDatas = Data.levelDatas.get(LevelDatasKind.FirstVillage);
+		var emptyLevelData:Data.EmptyLevels = Data.emptyLevels.get(Data.EmptyLevelsKind.EmptyLevel);
 		
-		for (layer in levelData.layers) {
-			trace(layer);
-		}
+		//traces(levelData);
 		
-		//levelData.props.getLayer("ground").alpha
-		//levelData.props.tileSize
+		// Default
+		// trace(emptyLevelData.id);
+		// trace(emptyLevelData.height);
+		// trace(emptyLevelData.width);
+		// trace(emptyLevelData.props);
+		// trace(emptyLevelData.tileProps);
+		// trace(emptyLevelData.layers);
+		
+		trace(levelData.level);
+		// Unique identifier (column is named "id" by default)
+		
+		trace(levelData.height);
+		// Height (in tiles)
+		
+		trace(levelData.width);
+		// Width (in tiles)
+		
+		trace(levelData.props);
+		// layers : Array<{ 
+		// 		l (layer) : String, (layer's name)
+		//		p (props) : { 
+		//						?color : Int (integer representation ?), 
+		// 						?alpha : Float (between 0 and 1), 
+		//						?mode : String ("ground" or "objects", assumed tiles mode otherwise) }
+		// 					}
+		// }>,
+		// tileSize : Int (size of the map tiles, one tile is [tileSize] pixels wide)
+		
+		trace(levelData.tileProps);
+		// TODO: 
+		// Gibberish ? Each column is a new item in the list in the palette in the level editor (lots of "in the")
+		// Each row ?
+		
+		// trace(levelData.layers);
+		traceLayers(levelData);
+		
 		var forestTileset = levelData.props.getTileset(Data.levelDatas, "forest.png");
-		trace(forestTileset.stride);
+		trace('forestTileset stride: ${forestTileset.stride}');
 		
-		var mapOfProps:Map<Int, Dynamic> = new Map<Int, Dynamic>();
-		for (i in 0...forestTileset.props.length) {
-			var prop:Dynamic = forestTileset.props[i];
-			if (prop != null) {
-				mapOfProps[i] = prop;
+		computeMapOfProps(forestTileset);
+		computeMapOfObjects(forestTileset);
+		
+		processLayers(levelData);
+		processObjectLayer(levelData, levelData.layers[1]);
+		processNpcs(levelData.npcs);
+		processPickups(levelData.pickups);
+		
+		add(mapGround);
+		add(mapObjects);
+		add(mapOver);
+		add(pickupSprites);
+		add(npcSprites);
+		add(player);
+	}
+
+	override public function update(elapsed:Float):Void
+	{
+		super.update(elapsed);
+		
+		if (FlxG.keys.anyJustPressed([Z, UP])) {
+			player.y -= 16;
+		}
+		if (FlxG.keys.anyJustPressed([Q, LEFT])) {
+			player.x -= 16;
+		}
+		if (FlxG.keys.anyJustPressed([S, DOWN])) {
+			player.y += 16;
+		}
+		if (FlxG.keys.anyJustPressed([D, RIGHT])) {
+			player.x += 16;
+		}
+		
+		if (FlxG.keys.justPressed.ONE) {
+			mapGround.visible = !mapGround.visible;
+		}
+		if (FlxG.keys.justPressed.TWO) {
+			mapObjects.visible = !mapObjects.visible;
+		}
+		if (FlxG.keys.justPressed.THREE) {
+			mapOver.visible = !mapOver.visible;
+		}
+		
+		FlxG.overlap(player, pickupSprites, playerPickup);
+	}
+	
+	private function playerPickup(player:Player, pickup:Pickup):Void
+	{
+		if (player.alive && player.exists && pickup.alive && pickup.exists)
+		{
+			pickup.kill();
+			player.money += pickup.money;
+			trace(player.money);
+		}
+	}
+	
+	private function processNpcs(npcs:ArrayRead < Data.LevelDatas_npcs > ):Void {
+		for (npc in npcs) {
+			switch(npc.kindId) {
+				case NpcsKind.Hero:			
+					player = new Player(npc);
+					
+				case NpcsKind.Finrod:
+					var finrod = Data.npcs.get(Data.NpcsKind.Finrod);
+					var finrodSprite = new FlxSprite(npc.x * finrod.image.size, npc.y * finrod.image.size);
+					finrodSprite.x -= finrod.image.size / 2;
+					finrodSprite.y -= finrod.image.size;
+					finrodSprite.loadGraphic(AssetPaths.chars__png, true, finrod.image.size * finrod.image.width, finrod.image.size * finrod.image.height);
+					finrodSprite.animation.add("normal", [2], 1);
+					finrodSprite.animation.play("normal");
+					npcSprites.add(finrodSprite);
 			}
 		}
-		for (key in mapOfProps.keys()) {
-			trace('$key => ${mapOfProps[key]}');
+	}
+	
+	private function processPickups(pickups:ArrayRead < Data.LevelDatas_pickups > ):Void {
+		for (pickup in pickups) {
+			var pickupSprite:Pickup = new Pickup(pickup);
+			pickupSprites.add(pickupSprite);
 		}
-		//trace(forestTileset.props.length);
-		//trace(forestTileset.sets.length);
-		
-		//Data.collides.all
-		//Data.levelDatas.get().collide.
-		//var ertert:Layer<Collides>;
-		
-		var mapOfObjects:Map<Int, Set> = new Map<Int, Set>();
-		
-		//trace("sets:");
-		//trace(levelData.collide.decode());
-		for (set in forestTileset.sets) {
-			trace(set);
-			switch(set.t) {
-				case object:
-					var computedId = (set.y * forestTileset.stride) + set.x;
-					mapOfObjects[computedId] = set;
-				case border:
-					//
-				case group:
-					//
-				case ground:
-					//
-				default:
-					trace('unknown type :' + set);
-			}
+	}
+	
+	private function processLayers(levelData:Data.LevelDatas):Void {
+		for (layer in levelData.layers) {
+			// Soit décoder et regarder le premier élément si c'est 0xFFFF, soit regarder dans levelData.props.l == layer.name => si p.mode && p.mode == "object"
+			
 		}
-		
-		mapGround = new FlxTilemapExt();
 		var groundLayer = levelData.layers[0];
 		mapGround.loadMapFromArray(groundLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, groundLayer.data.size, groundLayer.data.size, FlxTilemapAutoTiling.OFF, 1);
 		
-		mapObjects = new FlxTilemapExt();
-		var objectsLayer = levelData.layers[1];
+		var overLayer = levelData.layers[2];
+		mapOver.loadMapFromArray(overLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, overLayer.data.size, overLayer.data.size, FlxTilemapAutoTiling.OFF, 1);
+	}
+	
+	private function processObjectLayer(levelData:Data.LevelDatas, layer: Data.LevelDatas_layers ):Void {
+		var objectsLayer = layer;
 		var objectsDataMap = [for (i in 0...(levelData.width * levelData.height)) 0];
-		trace(objectsDataMap);
 		
 		// TODO: le faire pour d'autres si on détecte le 65535
 		// TODO: supporter la superposition
@@ -177,107 +240,103 @@ class PlayState extends FlxState
 		trace(objectsDataMap);
 		mapObjects.loadMapFromArray(objectsDataMap, levelData.width, levelData.height, AssetPaths.forest__png, objectsLayer.data.size, objectsLayer.data.size, FlxTilemapAutoTiling.OFF, 0);
 		mapObjects.setSpecialTiles(specialTiles);
-		
-		mapOver = new FlxTilemapExt();
-		var overLayer = levelData.layers[2];
-		mapOver.loadMapFromArray(overLayer.data.data.decode(), levelData.width, levelData.height, AssetPaths.forest__png, overLayer.data.size, overLayer.data.size, FlxTilemapAutoTiling.OFF, 1);
-		
-		for (layer in levelData.layers) {
-			trace("name : " + layer.name);
-			trace("file : " + layer.data.file);
-			trace("size : " + layer.data.size);
-			trace("stride : " + layer.data.stride);
-			trace("data : " + layer.data.data.decode());
-			trace("");
-		}
-		
-		npcSprites = new FlxSpriteGroup();	
-		
-		for (npc in levelData.npcs) {
-			switch(npc.kind.id) {
-				case Data.NpcsKind.Hero:
-					//var hero = Data.npcs.get(Data.NpcsKind.Hero);
-					//heroSprite = new FlxSprite(npc.x * hero.image.size, npc.y * hero.image.size);
-					//heroSprite.loadGraphic(AssetPaths.chars__png, true, hero.image.size, hero.image.size, true);
-					//heroSprite.setFacingFlip(FlxObject.LEFT, false, false);
-					//heroSprite.setFacingFlip(FlxObject.RIGHT, true, false);
-					//heroSprite.animation.add("normal", [0, 1, 2, 3], 4);
-					//heroSprite.animation.play("normal");
-					
-					player = new Player(npc);
-					
-				case Data.NpcsKind.Finrod:
-					var finrod = Data.npcs.get(Data.NpcsKind.Finrod);
-					var finrodSprite = new FlxSprite(npc.x * finrod.image.size, npc.y * finrod.image.size);
-					finrodSprite.x -= finrod.image.size / 2;
-					finrodSprite.y -= finrod.image.size;
-					finrodSprite.loadGraphic(AssetPaths.chars__png, true, finrod.image.size * finrod.image.width, finrod.image.size * finrod.image.height);
-					finrodSprite.animation.add("normal", [2], 1);
-					finrodSprite.animation.play("normal");
-					npcSprites.add(finrodSprite);
-			}
-		}
-		
-		pickupSprites = new FlxSpriteGroup();	
-		var pickupsTileset = levelData.props.getTileset(Data.levelDatas, "tO.png");
-		trace(pickupsTileset.stride);
-		for (pickup in levelData.pickups) {
-			var object = Data.pickups.get(pickup.kindId);
-			var sprite:FlxSprite = new FlxSprite(pickup.x * object.image.size, pickup.y * object.image.size);
-			sprite.loadGraphic(AssetPaths.tO__png, true, object.image.size, object.image.size);
-			sprite.animation.add("normal", [object.image.x + object.image.y * pickupsTileset.stride], 1);
-			sprite.animation.play("normal");
-			pickupSprites.add(sprite);
-			//switch(pickup.kind.id) {
-				//case Data.PickupsKind.Coin:
-				//case Data.PickupsKind.Trash:
-			//}
-		}
-		
-		add(mapGround);
-		add(mapObjects);
-		add(mapOver);
-		add(pickupSprites);
-		add(npcSprites);
-		add(player);
-	}
-
-	override public function update(elapsed:Float):Void
-	{
-		super.update(elapsed);
-		
-		if (FlxG.keys.anyJustPressed([Z, UP])) {
-			player.y -= 16;
-		}
-		if (FlxG.keys.anyJustPressed([Q, LEFT])) {
-			player.x -= 16;
-		}
-		if (FlxG.keys.anyJustPressed([S, DOWN])) {
-			player.y += 16;
-		}
-		if (FlxG.keys.anyJustPressed([D, RIGHT])) {
-			player.x += 16;
-		}
-		
-		if (FlxG.keys.justPressed.ONE) {
-			mapGround.visible = !mapGround.visible;
-		}
-		if (FlxG.keys.justPressed.TWO) {
-			mapObjects.visible = !mapObjects.visible;
-		}
-		if (FlxG.keys.justPressed.THREE) {
-			mapOver.visible = !mapOver.visible;
-		}
-		
-		FlxG.overlap(player, pickupSprites, playerPickup);
 	}
 	
-	private function playerPickup(P:Player, UP:FlxSprite):Void
-	{
-		if (P.alive && P.exists && UP.alive && UP.exists)
-		{
-			UP.kill();
-			P.money++;
+	private function computeMapOfObjects(tileset:cdb.Data.TilesetProps): Void {
+		for (set in tileset.sets) {
+			trace(set);
+			switch(set.t) {
+				case object:
+					var computedId = (set.y * tileset.stride) + set.x;
+					mapOfObjects[computedId] = set;
+				case border:
+					//
+				case group:
+					//
+				case ground:
+					//
+				default:
+					trace('unknown type :' + set);
+			}
 		}
+	}
+	
+	private function computeMapOfProps(tileset:cdb.Data.TilesetProps): Void {
+		for (i in 0...tileset.props.length) {
+			var prop:Dynamic = tileset.props[i];
+			if (prop != null) {
+				mapOfProps[i] = prop;
+			}
+		}
+		for (key in mapOfProps.keys()) {
+			trace('$key => ${mapOfProps[key]}');
+		}
+	}
+	
+	private function traceLayers(levelData:Data.LevelDatas):Void {
+		// List of layers in the "layers" column
+		for (layer in levelData.layers) {
+			trace("name : " + layer.name);
+			// String, name of the layer
+			
+			trace("blending: " + layer.blending);
+			// Enumeration (Add, Multiply, Erase) ?
+			
+			trace("file : " + layer.data.file);
+			// String, name of the tileset file
+			
+			trace("size : " + layer.data.size);
+			// Int, size of the tiles in the tileset
+			
+			trace("stride : " + layer.data.stride);
+			// Int, width (in tiles) of the tilesheet (ISSUE: have to select file twice for it to be correct)
+			
+			trace("data : " + layer.data.data.decode());
+			// Array<Int>
+			// either width x height with tile id as a value (ground/tile)
+			// or 0xFFFF (65535) to indicate object array, then numberOfObjects x 3 (x, y, top left id)
+			
+			trace("");
+		}
+	}
+	
+	private function traces(levelData:Data.LevelDatas):Void {
+		trace("items : ");
+		for (item in Data.items.all) {
+			trace(item);
+		}
+		trace("npcs : ");
+		for (npc in Data.npcs.all) {
+			trace(npc);
+		}
+		trace("collides :");
+		for (collide in Data.collides.all) {
+			trace(collide);
+		}
+		
+		//trace(Data.ItemsKind);
+		trace(Data.items.get(Data.ItemsKind.Sword));
+		trace(Data.items.resolve("Sword"));
+		
+		// Ok
+		trace(Data.items.resolve("Guinea Pig", true));
+		
+		// Would crash because there is no "Guinea Pig" object (sadly)
+		//trace(Data.items.resolve("Guinea Pig", false));
+		
+		//trace(forestTileset.props.length);
+		//trace(forestTileset.sets.length);
+		
+		//Data.collides.all
+		//Data.levelDatas.get().collide.
+		//var ertert:Layer<Collides>;
+		
+		//trace("sets:");
+		//trace(levelData.collide.decode());
+		
+		//levelData.props.getLayer("ground").alpha
+		//levelData.props.tileSize
+		
+		//var something:cdb.Data.SOME_TYPE;
 	}
 }

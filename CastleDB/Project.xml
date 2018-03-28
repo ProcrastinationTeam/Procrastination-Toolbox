@@ -84,4 +84,12 @@
 	<!-- _________________________________ Custom _______________________________ -->
 
 	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
+	
+	<!--<haxedef name="HXCPP_STACK_TRACE"/>-->
+	<!--<haxedef name="HXCPP_CHECK_POINTER"/> -->
+	<!--for null pointer exceptions-->
+	
+	<!--"C:\Users\user\AppData\Roaming\HaxeFlixel"-->
+	<!--yes, that's the location. but only if you left the "company" in project.xml as "HaxeFlixel" in <app>-->
+	<!--save-->
 </project>

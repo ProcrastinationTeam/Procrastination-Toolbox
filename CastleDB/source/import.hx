@@ -2,11 +2,16 @@ import sys.io.File;
 
 import openfl.display.Sprite;
 
+import cdb.Data.TileMode;
 import cdb.Lz4Reader;
 import cdb.Module;
+import cdb.TileBuilder;
+import cdb.Types.ArrayRead;
 import cdb.Types.Layer;
+import cdb.Types.LevelPropsAccess;
 import cdb.Types.TileLayer;
 import cdb.Types.TileLayerData;
+import cdb.Types.TilePos;
 
 import flixel.FlxG;
 import flixel.FlxGame;
