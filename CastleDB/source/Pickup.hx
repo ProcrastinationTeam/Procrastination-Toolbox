@@ -13,8 +13,7 @@ class Pickup extends FlxSprite
 		
 		// TODO: re use AssetPaths ?
 		loadGraphic("assets/" + pickupData.image.file, true, pickupData.image.size, pickupData.image.size);
-		animation.add("normal", [pickupData.image.x + pickupData.image.y * pickupsTileset.stride], 1);
-		animation.play("normal");
+		animation.frameIndex = pickupData.image.x + pickupData.image.y * pickupsTileset.stride;
 		
 		money = pickupData.money;
 	}

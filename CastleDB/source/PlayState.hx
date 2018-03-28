@@ -189,8 +189,7 @@ class PlayState extends FlxState
 					finrodSprite.x -= finrod.image.size / 2;
 					finrodSprite.y -= finrod.image.size;
 					finrodSprite.loadGraphic(AssetPaths.chars__png, true, finrod.image.size * finrod.image.width, finrod.image.size * finrod.image.height);
-					finrodSprite.animation.add("normal", [2], 1);
-					finrodSprite.animation.play("normal");
+					finrodSprite.animation.frameIndex = 2;
 					npcSprites.add(finrodSprite);
 			}
 		}
