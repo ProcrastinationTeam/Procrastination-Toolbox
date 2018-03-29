@@ -3842,39 +3842,6 @@
 			]
 		},
 		{
-			"name": "TestList",
-			"columns": [
-				{
-					"typeStr": "0",
-					"name": "id"
-				},
-				{
-					"typeStr": "5:1,2,3,4,5,6",
-					"name": "list"
-				}
-			],
-			"lines": [
-				{
-					"id": "A",
-					"list": 3,
-					"index": 0
-				},
-				{
-					"id": "B",
-					"list": 2,
-					"index": 1
-				}
-			],
-			"separators": [
-				0,
-				1
-			],
-			"props": {
-				"hasGroup": true,
-				"hasIndex": true
-			}
-		},
-		{
 			"name": "levelDatas@pickups",
 			"props": {
 				"hide": true
@@ -4007,81 +3974,6 @@
 					"typeStr": "14",
 					"name": "tile",
 					"display": null
-				}
-			]
-		},
-		{
-			"name": "emptyLevels",
-			"columns": [
-				{
-					"name": "id",
-					"typeStr": "0"
-				},
-				{
-					"name": "width",
-					"typeStr": "3"
-				},
-				{
-					"name": "height",
-					"typeStr": "3"
-				},
-				{
-					"name": "props",
-					"typeStr": "16"
-				},
-				{
-					"name": "tileProps",
-					"typeStr": "8"
-				},
-				{
-					"name": "layers",
-					"typeStr": "8"
-				}
-			],
-			"lines": [
-				{
-					"id": "EmptyLevel",
-					"width": 128,
-					"height": 128,
-					"tileProps": [],
-					"layers": [],
-					"props": {
-						"tileSize": 16,
-						"layers": []
-					}
-				}
-			],
-			"separators": [],
-			"props": {
-				"level": {
-					"tileSets": {}
-				}
-			}
-		},
-		{
-			"name": "emptyLevels@tileProps",
-			"props": {
-				"hide": true
-			},
-			"separators": [],
-			"lines": [],
-			"columns": []
-		},
-		{
-			"name": "emptyLevels@layers",
-			"props": {
-				"hide": true
-			},
-			"separators": [],
-			"lines": [],
-			"columns": [
-				{
-					"name": "name",
-					"typeStr": "1"
-				},
-				{
-					"name": "data",
-					"typeStr": "15"
 				}
 			]
 		},

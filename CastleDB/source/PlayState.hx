@@ -37,6 +37,8 @@ class PlayState extends FlxState
 	private var mapOfObjects		: Map<Int, Set> 				= new Map<Int, Set>();
 	private var mapOfProps			: Map<Int, Dynamic> 			= new Map<Int, Dynamic>();
 	
+	private var mapObjectsCollisions : FlxGroup						= new FlxGroup();
+	
 	// Depending on your map, this can impact the performances quite a lot
 	// (With FlxTileMap as of March 2018, as far a I know)
 	private static inline var ENABLE_MULTIPLE_GROUND_BORDER_TILEMAPS 	: Bool 	= true;
@@ -51,17 +53,16 @@ class PlayState extends FlxState
 		Data.load(content);
 		
 		var levelData:Data.LevelDatas = Data.levelDatas.get(LevelDatasKind.FirstVillage);
-		var emptyLevelData:Data.EmptyLevels = Data.emptyLevels.get(Data.EmptyLevelsKind.EmptyLevel);
 		
 		//traces(levelData);
 		
 		// Default
-		// trace(emptyLevelData.id);
-		// trace(emptyLevelData.height);
-		// trace(emptyLevelData.width);
-		// trace(emptyLevelData.props);
-		// trace(emptyLevelData.tileProps);
-		// trace(emptyLevelData.layers);
+		// trace(levelData.id);
+		// trace(levelData.height);
+		// trace(levelData.width);
+		// trace(levelData.props);
+		// trace(levelData.tileProps);
+		// trace(levelData.layers);
 		
 		trace(levelData.level);
 		// Unique identifier (column is named "id" by default)
@@ -163,7 +164,8 @@ class PlayState extends FlxState
 		FlxG.overlap(player, pickupSprites, playerPickup);
 
 		FlxG.collide(player, npcSprites);
-		FlxG.collide(player, mapObjects);
+		//FlxG.collide(player, mapObjects);
+		FlxG.collide(player, mapObjectsCollisions);
 	}
 	
 	private function playerPickup(player:Player, pickup:Pickup):Void
@@ -365,9 +367,25 @@ class PlayState extends FlxState
 				//specialTiles.push(specialTile);
 			//}
 		}
-		// trace(objectsDataMap);
+		 //trace(objectsDataMap);
 		mapObjects.loadMapFromArray(objectsDataMap, levelData.width, levelData.height, "assets/" + objectsLayer.data.file, objectsLayer.data.size, objectsLayer.data.size, FlxTilemapAutoTiling.OFF, 0);
 		//mapObjects.setSpecialTiles(specialTiles);
+		
+		
+		for (y in 0...50) {
+			for (x in 0...50) {
+				if (mapObjects.getTile(x, y) != 0) {
+					var sprite:FlxObject = new FlxObject((x * 16) , (y * 16) );
+					sprite.immovable = true;
+					sprite.allowCollisions = FlxObject.ANY;
+					sprite.setSize(16, 16);
+					sprite.active = false;
+					//sprite.exists = false; // trop violent
+					mapObjectsCollisions.add(sprite);
+				}
+			}
+		}
+		add(mapObjectsCollisions);
 	}
 	
 	private function computeMapOfObjects(tileset:cdb.Data.TilesetProps): Void {
