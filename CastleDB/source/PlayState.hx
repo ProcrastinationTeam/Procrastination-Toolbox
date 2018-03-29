@@ -131,23 +131,19 @@ class PlayState extends FlxState
 		
 		// And finally the player
 		add(player);
+
+		FlxG.camera.follow(player, LOCKON, 0.5);
+		FlxG.camera.zoom = 1;
+
+		mapGround.follow(FlxG.camera, 1);
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		
-		if (FlxG.keys.anyJustPressed([Z, UP])) {
-			player.y -= 16;
-		}
-		if (FlxG.keys.anyJustPressed([Q, LEFT])) {
-			player.x -= 16;
-		}
-		if (FlxG.keys.anyJustPressed([S, DOWN])) {
-			player.y += 16;
-		}
-		if (FlxG.keys.anyJustPressed([D, RIGHT])) {
-			player.x += 16;
+
+		if(FlxG.keys.pressed.SHIFT) {
+			FlxG.camera.zoom += FlxG.mouse.wheel / 20.;
 		}
 		
 		if (FlxG.keys.justPressed.ONE) {
@@ -165,6 +161,9 @@ class PlayState extends FlxState
 		}
 		
 		FlxG.overlap(player, pickupSprites, playerPickup);
+
+		FlxG.collide(player, npcSprites);
+		FlxG.collide(player, mapObjects);
 	}
 	
 	private function playerPickup(player:Player, pickup:Pickup):Void
@@ -188,8 +187,14 @@ class PlayState extends FlxState
 					var finrodSprite = new FlxSprite(npc.x * finrod.image.size, npc.y * finrod.image.size);
 					finrodSprite.x -= finrod.image.size / 2;
 					finrodSprite.y -= finrod.image.size;
-					finrodSprite.loadGraphic(AssetPaths.chars__png, true, finrod.image.size * finrod.image.width, finrod.image.size * finrod.image.height);
+					finrodSprite.loadGraphic("assets/" + finrod.image.file, true, finrod.image.size * finrod.image.width, finrod.image.size * finrod.image.height, false);
 					finrodSprite.animation.frameIndex = 2;
+
+					for(anim in finrod.animations) {
+						finrodSprite.animation.add(anim.name, [for(frame in anim.frames) frame.frame.x + frame.frame.y * finrod.image.width], anim.frameRate);
+					}
+					finrodSprite.animation.play("idle");
+					
 					npcSprites.add(finrodSprite);
 			}
 		}
@@ -360,7 +365,7 @@ class PlayState extends FlxState
 				//specialTiles.push(specialTile);
 			//}
 		}
-		trace(objectsDataMap);
+		// trace(objectsDataMap);
 		mapObjects.loadMapFromArray(objectsDataMap, levelData.width, levelData.height, "assets/" + objectsLayer.data.file, objectsLayer.data.size, objectsLayer.data.size, FlxTilemapAutoTiling.OFF, 0);
 		//mapObjects.setSpecialTiles(specialTiles);
 	}

@@ -420,6 +420,10 @@
 					"typeStr": "4",
 					"name": "animSpeed",
 					"opt": true
+				},
+				{
+					"typeStr": "8",
+					"name": "animations"
 				}
 			],
 			"lines": [
@@ -427,12 +431,132 @@
 					"id": "Hero",
 					"name": "Kuro",
 					"image": {
-						"file": "chars.png",
+						"file": "MisterBelly.png",
 						"size": 16,
 						"x": 0,
 						"y": 0
 					},
-					"hasPortrait": true
+					"hasPortrait": true,
+					"animations": [
+						{
+							"name": "idle",
+							"frames": [
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 0,
+										"y": 0
+									}
+								}
+							],
+							"frameRate": 10
+						},
+						{
+							"name": "walk",
+							"frames": [
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 1,
+										"y": 0
+									}
+								},
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 2,
+										"y": 0
+									}
+								},
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 1,
+										"y": 0
+									}
+								},
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 0,
+										"y": 0
+									}
+								}
+							],
+							"frameRate": 6
+						},
+						{
+							"name": "run",
+							"frames": [
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 4,
+										"y": 0
+									}
+								},
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 3,
+										"y": 0
+									}
+								}
+							],
+							"frameRate": 6
+						},
+						{
+							"name": "text",
+							"frames": [
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 5,
+										"y": 0
+									}
+								},
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 6,
+										"y": 0
+									}
+								}
+							],
+							"frameRate": 6
+						},
+						{
+							"name": "call",
+							"frames": [
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 7,
+										"y": 0
+									}
+								},
+								{
+									"frame": {
+										"file": "MisterBelly.png",
+										"size": 16,
+										"x": 8,
+										"y": 0
+									}
+								}
+							],
+							"frameRate": 6
+						}
+					]
 				},
 				{
 					"id": "Finrod",
@@ -446,7 +570,31 @@
 						"width": 2,
 						"height": 2
 					},
-					"animSpeed": 0.2
+					"animSpeed": 0.2,
+					"animations": [
+						{
+							"name": "idle",
+							"frames": [
+								{
+									"frame": {
+										"file": "chars.png",
+										"size": 32,
+										"x": 0,
+										"y": 1
+									}
+								},
+								{
+									"frame": {
+										"file": "chars.png",
+										"size": 32,
+										"x": 1,
+										"y": 1
+									}
+								}
+							],
+							"frameRate": 2
+						}
+					]
 				}
 			],
 			"separators": [
@@ -3934,6 +4082,44 @@
 				{
 					"name": "data",
 					"typeStr": "15"
+				}
+			]
+		},
+		{
+			"name": "npcs@animations",
+			"props": {
+				"hide": true
+			},
+			"separators": [],
+			"lines": [],
+			"columns": [
+				{
+					"typeStr": "1",
+					"name": "name"
+				},
+				{
+					"typeStr": "8",
+					"name": "frames",
+					"display": null
+				},
+				{
+					"typeStr": "3",
+					"name": "frameRate"
+				}
+			]
+		},
+		{
+			"name": "npcs@animations@frames",
+			"props": {
+				"hide": true
+			},
+			"separators": [],
+			"lines": [],
+			"columns": [
+				{
+					"typeStr": "14",
+					"name": "frame",
+					"display": null
 				}
 			]
 		}

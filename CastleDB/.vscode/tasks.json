@@ -81,7 +81,7 @@
 				"test",
 				"neko",
 				"-debug",
-				"--connect 6000",
+				// "--connect 6000",
 			],
 			"problemMatcher": "$haxe",
 			"group": {
