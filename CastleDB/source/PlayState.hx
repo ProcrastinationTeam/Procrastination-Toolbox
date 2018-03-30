@@ -188,6 +188,7 @@ class PlayState extends FlxState
 				case NpcsKind.Finrod:
 					var finrod = Data.npcs.get(Data.NpcsKind.Finrod);
 					var finrodSprite = new FlxSprite(npc.x * finrod.image.size, npc.y * finrod.image.size);
+					finrodSprite.immovable = true;
 					finrodSprite.x -= finrod.image.size / 2;
 					finrodSprite.y -= finrod.image.size;
 					finrodSprite.loadGraphic("assets/" + finrod.image.file, true, finrod.image.size * finrod.image.width, finrod.image.size * finrod.image.height, false);
