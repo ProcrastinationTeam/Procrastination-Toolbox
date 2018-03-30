@@ -443,7 +443,7 @@ class PlayState extends FlxState
 				
 				var prop:Dynamic = mapOfProps[tileId];
 				
-				trace('($x, $y) : $tileId => $prop');
+				//trace('($x, $y) : $tileId => $prop');
 				if (prop != null && prop.collide != null) {
 					
 					// FlxSprite to debug, FlxObject otherwise
@@ -453,6 +453,7 @@ class PlayState extends FlxState
 					objectCollisionObject.active = false;
 					objectCollisionObject.moves = false;
 					objectCollisionObject.setSize(objectsLayer.data.size, objectsLayer.data.size);
+					//objectCollisionObject.makeGraphic(16, 16, FlxColor.TRANSPARENT);
 					//objectCollisionObject.exists = false; // trop violent
 					
 					switch(prop.collide) {
@@ -460,9 +461,10 @@ class PlayState extends FlxState
 							// Default
 							
 						case Small:
-							//objectCollisionObject.x += objectsLayer.data.size / 4;
-							//objectCollisionObject.y += objectsLayer.data.size / 4;
-							//objectCollisionObject.setSize(objectsLayer.data.size / 2, objectsLayer.data.size / 2);
+							// USE RESET
+							// If you just set x and y, "last" is not updated and fucks up collisions
+							objectCollisionObject.reset(objectCollisionObject.x + objectsLayer.data.size / 4, objectCollisionObject.y + objectsLayer.data.size / 4);
+							objectCollisionObject.setSize(objectsLayer.data.size / 2, objectsLayer.data.size / 2);
 							
 						case No:
 							objectCollisionObject.allowCollisions = FlxObject.NONE;
