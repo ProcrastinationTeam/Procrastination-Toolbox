@@ -25,19 +25,20 @@ typedef Set = {
 
 class PlayState extends FlxState
 {
-	private var player 				: Player;
-	private var npcSprites 			: FlxSpriteGroup				= new FlxSpriteGroup();
-	private var pickupSprites 		: FlxSpriteGroup				= new FlxSpriteGroup();
+	private var player 					: Player;
+	private var npcSprites 				: FlxSpriteGroup				= new FlxSpriteGroup();
+	private var pickupSprites 			: FlxSpriteGroup				= new FlxSpriteGroup();
 	
-	private var mapGround			: FlxTilemap					= new FlxTilemap();
-	private var mapsGroundBorders	: FlxTypedGroup<FlxTilemap>		= new FlxTypedGroup<FlxTilemap>();
-	private var mapObjects 			: FlxTilemapExt					= new FlxTilemapExt();
-	private var mapOver 			: FlxTilemap					= new FlxTilemap();
+	private var mapGround				: FlxTilemap					= new FlxTilemap();
+	private var mapsGroundBorders		: FlxTypedGroup<FlxTilemap>		= new FlxTypedGroup<FlxTilemap>();
+	private var mapObjects 				: FlxTilemapExt					= new FlxTilemapExt();
+	private var mapOver 				: FlxTilemap					= new FlxTilemap();
 	
-	private var mapOfObjects		: Map<Int, Set> 				= new Map<Int, Set>();
-	private var mapOfProps			: Map<Int, Dynamic> 			= new Map<Int, Dynamic>();
+	private var mapOfObjects			: Map<Int, Set> 				= new Map<Int, Set>();
+	private var mapOfProps				: Map<Int, Dynamic> 			= new Map<Int, Dynamic>();
 	
-	private var mapObjectsCollisions : FlxGroup						= new FlxGroup();
+	private var objectsCollisionGroup 	: FlxGroup						= new FlxGroup();
+	private var groundCollisionGroup 	: FlxGroup						= new FlxGroup();
 	
 	// Depending on your map, this can impact the performances quite a lot
 	// (With FlxTileMap as of March 2018, as far a I know)
@@ -110,16 +111,16 @@ class PlayState extends FlxState
 		//////////////////////////////////////// Add all the layers in the right order
 		// First "simple" ground tiles
 		add(mapGround);
+		// and their collisions
+		add(groundCollisionGroup);
 		
 		// Then borders (autotiling)
-		// OLD
-		//add(mapGroundBorders);
-		
-		// NEW
 		add(mapsGroundBorders);
 		
 		// Then objects (mostly non interactive doodads like trees, rocks, etc)
 		add(mapObjects);
+		// and their collisions
+		add(objectsCollisionGroup);
 		
 		// Then the over layer (top of trees and cliffs ?)
 		add(mapOver);
@@ -132,10 +133,10 @@ class PlayState extends FlxState
 		
 		// And finally the player
 		add(player);
-
+		
 		FlxG.camera.follow(player, LOCKON, 0.5);
-		FlxG.camera.zoom = 1;
-
+		FlxG.camera.zoom = 1.5;
+		
 		mapGround.follow(FlxG.camera, 1);
 	}
 
@@ -164,8 +165,8 @@ class PlayState extends FlxState
 		FlxG.overlap(player, pickupSprites, playerPickup);
 
 		FlxG.collide(player, npcSprites);
-		//FlxG.collide(player, mapObjects);
-		FlxG.collide(player, mapObjectsCollisions);
+		FlxG.collide(player, groundCollisionGroup);
+		//FlxG.collide(player, objectsCollisionGroup);
 	}
 	
 	private function playerPickup(player:Player, pickup:Pickup):Void
@@ -191,7 +192,7 @@ class PlayState extends FlxState
 					finrodSprite.y -= finrod.image.size;
 					finrodSprite.loadGraphic("assets/" + finrod.image.file, true, finrod.image.size * finrod.image.width, finrod.image.size * finrod.image.height, false);
 					finrodSprite.animation.frameIndex = 2;
-
+					
 					for(anim in finrod.animations) {
 						finrodSprite.animation.add(anim.name, [for(frame in anim.frames) frame.frame.x + frame.frame.y * finrod.image.width], anim.frameRate);
 					}
@@ -294,12 +295,28 @@ class PlayState extends FlxState
 			}
 		}
 		
-		trace(groundBordersMapsData.length);
 		for (i in 0...groundBordersMapsData.length) {
 			var groundBordersMapData:Array<Int> = groundBordersMapsData[i];
 			var mapGroundBorders:FlxTilemap = new FlxTilemap();
 			mapGroundBorders.loadMapFromArray(groundBordersMapData, levelData.width, levelData.height, "assets/" + groundLayer.data.file, groundLayer.data.size, groundLayer.data.size);			
 			mapsGroundBorders.add(mapGroundBorders);
+		}
+		
+		// Collisions
+		for (y in 0...levelData.height) {
+			for (x in 0...levelData.width) {
+				var tileId:Int = mapGround.getTile(x, y);
+				var prop:Dynamic = mapOfProps[tileId];
+				if (prop != null && prop.collide != null && prop.collide == Full) {
+					var groundCollisionObject:FlxObject = new FlxObject(x * groundLayer.data.size, y * groundLayer.data.size);
+					groundCollisionObject.immovable = true;
+					groundCollisionObject.allowCollisions = FlxObject.ANY;
+					groundCollisionObject.setSize(groundLayer.data.size, groundLayer.data.size);
+					groundCollisionObject.active = false;
+					//groundCollisionObject.exists = false; // trop violent
+					groundCollisionGroup.add(groundCollisionObject);
+				}
+			}
 		}
 	}
 	
@@ -371,21 +388,85 @@ class PlayState extends FlxState
 		mapObjects.loadMapFromArray(objectsDataMap, levelData.width, levelData.height, "assets/" + objectsLayer.data.file, objectsLayer.data.size, objectsLayer.data.size, FlxTilemapAutoTiling.OFF, 0);
 		//mapObjects.setSpecialTiles(specialTiles);
 		
-		
-		for (y in 0...50) {
-			for (x in 0...50) {
-				if (mapObjects.getTile(x, y) != 0) {
-					var sprite:FlxObject = new FlxObject((x * 16) , (y * 16) );
-					sprite.immovable = true;
-					sprite.allowCollisions = FlxObject.ANY;
-					sprite.setSize(16, 16);
-					sprite.active = false;
-					//sprite.exists = false; // trop violent
-					mapObjectsCollisions.add(sprite);
+		for (y in 0...levelData.height) {
+			for (x in 0...levelData.width) {
+				var tileId:Int = mapObjects.getTile(x, y);
+				var prop:Dynamic = mapOfProps[tileId];
+				if (prop != null && prop.collide != null) {
+					
+					var objectCollisionObject:FlxObject = new FlxObject(x * objectsLayer.data.size, y * objectsLayer.data.size);
+					objectCollisionObject.immovable = true;
+					objectCollisionObject.allowCollisions = FlxObject.ANY;
+					objectCollisionObject.active = false;
+					//objectCollisionObject.setSize(objectsLayer.data.size, objectsLayer.data.size);
+					//groundCollisionObject.exists = false; // trop violent
+					
+					switch(prop.collide) {
+						case Full:
+							// Default
+							objectCollisionObject.setSize(objectsLayer.data.size, objectsLayer.data.size);
+							
+						case Small:
+							objectCollisionObject.x += objectsLayer.data.size / 4;
+							objectCollisionObject.y += objectsLayer.data.size / 4;
+							objectCollisionObject.setSize(objectsLayer.data.size / 2, objectsLayer.data.size / 2);
+							//objectCollisionObject.makeGraphic(4, 4);
+							//objectCollisionObject.offset.add(objectsLayer.data.size / 4, objectsLayer.data.size / 4);
+							//objectCollisionObject.updateHitbox();
+							
+						case No:
+							objectCollisionObject.allowCollisions = FlxObject.NONE;
+							
+						case Top:
+							objectCollisionObject.allowCollisions = FlxObject.UP;
+							
+						case Right:
+							objectCollisionObject.allowCollisions = FlxObject.RIGHT;
+							
+						case Bottom:
+							objectCollisionObject.allowCollisions = FlxObject.DOWN;
+							
+						case Right:
+							objectCollisionObject.allowCollisions = FlxObject.RIGHT;
+							
+						case HalfTop:
+							//
+							
+						case HalfBottom:
+							//
+							
+						case HalfLeft:
+							//
+							
+						case HalfRight:
+							//
+							
+						case Vertical:
+							//
+							
+						case Horizontal:
+							//
+							
+						case CornerTR:
+							//
+							
+						case CornerBR:
+							//
+							
+						case CornerBL:
+							//
+							
+						case CornerTL:
+							//
+							
+						default: 
+							trace('($x, $y) : $tileId => $prop');
+					}
+					
+					objectsCollisionGroup.add(objectCollisionObject);
 				}
 			}
 		}
-		add(mapObjectsCollisions);
 	}
 	
 	private function computeMapOfObjects(tileset:cdb.Data.TilesetProps): Void {
@@ -411,7 +492,7 @@ class PlayState extends FlxState
 		for (i in 0...tileset.props.length) {
 			var prop:Dynamic = tileset.props[i];
 			if (prop != null) {
-				mapOfProps[i] = prop;
+				mapOfProps[i + 1] = prop;
 			}
 		}
 		for (key in mapOfProps.keys()) {
