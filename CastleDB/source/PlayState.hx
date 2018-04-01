@@ -5,7 +5,7 @@ import flixel.util.FlxColor;
 
 //var jdffdgdfg:cdb.Data.TilesetProps;
 
-//var tileBuilder:TileBuilder = new TileBuilder(tileSetProps, stride, total);
+//var tileBuilder = new TileBuilder(tileSetProps, stride, total);
 //var ground:Array<Int> = tileBuilder.buildGrounds(input, width);
 
 //Data.decode(Data.levelDatas.all); // ?? cf issue
@@ -288,11 +288,11 @@ class PlayState extends FlxState
 		// There is not always a single tile per coordinate
 		// (Comments in git/cdb/TileBuilder.hx laptop)
 		
-		var tileBuilder:TileBuilder = new TileBuilder(tileset, groundLayer.data.stride, 0);
+		var tileBuilder = new TileBuilder(tileset, groundLayer.data.stride, 0);
 		var groundMapArray:Array<Int> = tileBuilder.buildGrounds(groundLayer.data.data.decode(), levelData.width);
 		
 		// TODO: array comprehension like above ?
-		var groundBordersMapsData:Array<Array<Int>> = new Array<Array<Int>>();
+		var groundBordersMapsData = new Array<Array<Int>>();
 		
 		// TODO: perfs
 		// Create 4 tilemaps by default, more on the fly if needed
@@ -310,7 +310,7 @@ class PlayState extends FlxState
 			var position = x + (y * levelData.width);
 			
 			// To check if the tile has been added
-			var added:Bool = false;
+			var added = false;
 			
 			for (tempArray in groundBordersMapsData) {
 				if (tempArray[position] == 0) {
@@ -332,7 +332,7 @@ class PlayState extends FlxState
 		
 		for (i in 0...groundBordersMapsData.length) {
 			var groundBordersMapData:Array<Int> = groundBordersMapsData[i];
-			var tilemapGroundBorders:FlxTilemap = new FlxTilemap();
+			var tilemapGroundBorders = new FlxTilemap();
 			tilemapGroundBorders.loadMapFromArray(groundBordersMapData, levelData.width, levelData.height, "assets/" + groundLayer.data.file, groundLayer.data.size, groundLayer.data.size);			
 			tilemapsGroundBorders.add(tilemapGroundBorders);
 		}
@@ -346,7 +346,7 @@ class PlayState extends FlxState
 				var tileId:Int = tilemapGround.getTile(x, y);
 				var prop:Dynamic = mapOfProps[tileId];
 				if (prop != null && prop.collide != null && prop.collide == Full) {
-					var groundCollisionObject:FlxObject = new FlxObject(x * groundLayer.data.size, y * groundLayer.data.size);
+					var groundCollisionObject = new FlxObject(x * groundLayer.data.size, y * groundLayer.data.size);
 					groundCollisionObject.immovable = true;
 					groundCollisionObject.allowCollisions = FlxObject.ANY;
 					groundCollisionObject.setSize(groundLayer.data.size, groundLayer.data.size);
@@ -447,7 +447,7 @@ class PlayState extends FlxState
 				if (prop != null && prop.collide != null) {
 					
 					// FlxSprite to debug, FlxObject otherwise
-					var objectCollisionObject:FlxObject = new FlxObject(x * objectsLayer.data.size, y * objectsLayer.data.size);
+					var objectCollisionObject = new FlxObject(x * objectsLayer.data.size, y * objectsLayer.data.size);
 					objectCollisionObject.immovable = true;
 					objectCollisionObject.allowCollisions = FlxObject.ANY;
 					objectCollisionObject.active = false;
@@ -555,7 +555,7 @@ class PlayState extends FlxState
 	
 	private function processPickups(pickups:ArrayRead < Data.LevelDatas_pickups > ):Void {
 		for (pickup in pickups) {
-			var pickupSprite:Pickup = new Pickup(pickup);
+			var pickupSprite = new Pickup(pickup);
 			pickupSprites.add(pickupSprite);
 		}
 	}
@@ -576,7 +576,7 @@ class PlayState extends FlxState
 			// Int, size of the tiles in the tileset
 			
 			trace("stride : " + layer.data.stride);
-			// Int, width (in tiles) of the tilesheet (ISSUE: have to select file twice for it to be correct)
+			// Int, width (in tiles) of the tilesheet
 			
 			trace("data : " + layer.data.data.decode());
 			// Array<Int>
