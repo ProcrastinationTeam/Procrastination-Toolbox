@@ -1,6 +1,10 @@
 package;
 import cdb.Data.LayerMode;
+import flixel.FlxCamera.FlxCameraFollowStyle;
+import flixel.FlxSprite;
+import flixel.addons.display.FlxZoomCamera;
 import flixel.group.FlxGroup;
+import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 
 //var jdffdgdfg:cdb.Data.TilesetProps;
@@ -64,15 +68,31 @@ class PlayState extends FlxState
 	private static inline var ENABLE_MULTIPLE_GROUND_BORDER_TILEMAPS 	: Bool 	= true;
 	private static inline var MAX_NUMBER_OF_GROUND_BORDER_TILEMAPS 		: Int 	= 20;
 	
+	
+	
+	// BORDEL
+	private var houseSprite				: FlxSprite;
+	private var levelDataKind			: Data.LevelDatasKind;
+	private var levelData 				: Data.LevelDatas;
+	
+	public function new(levelDataKind:Data.LevelDatasKind) {
+		super();
+		this.levelDataKind = levelDataKind;
+	}
+	
 	override public function create():Void
 	{
 		super.create();
+		
+		if (levelDataKind == null) {
+			levelDataKind = LevelDatasKind.FirstVillage;
+		}
 		
 		// Init cdb
 		var content:String = File.getContent(AssetPaths.data__cdb);
 		Data.load(content);
 		
-		var levelData:Data.LevelDatas = Data.levelDatas.get(LevelDatasKind.FirstVillage);
+		levelData = Data.levelDatas.get(levelDataKind);
 		
 		//traces(levelData);
 		
@@ -164,10 +184,28 @@ class PlayState extends FlxState
 		add(player);
 		
 		// Camera setup
-		FlxG.camera.follow(player, LOCKON, 0.5);
+		FlxG.camera.follow(player, FlxCameraFollowStyle.LOCKON, 0.5);
 		FlxG.camera.zoom = 1.5;
 		
-		tilemapGround.follow(FlxG.camera, 0);
+		tilemapGround.follow(FlxG.camera, 0, true);
+		
+		//FlxG.camera.setScrollBounds(0, levelData.width * levelData.props.tileSize, 0 , levelData.height * levelData.props.tileSize);
+		
+		for (trigger in levelData.triggers) {
+			//trace(trigger);
+			if (trigger.action != null) {
+				var parameters = trigger.action.getParameters();
+				//trace(parameters[0]);
+				if (parameters[0] == "House" || parameters[0] == "FirstVillage") {
+					//trace("omfg");
+					trace(trigger);
+					houseSprite = new FlxSprite(trigger.x * levelData.props.tileSize, trigger.y * levelData.props.tileSize);
+					houseSprite.setSize(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height);
+					houseSprite.makeGraphic(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height, FlxColor.TRANSPARENT);
+					add(houseSprite);
+				}
+			}
+		}
 	}
 
 	override public function update(elapsed:Float):Void
@@ -196,6 +234,19 @@ class PlayState extends FlxState
 		
 		FlxG.collide(player, npcSprites);
 		FlxG.collide(player, collisionsGroup);
+		
+		FlxG.overlap(player, houseSprite, HouseEnter);
+	}
+	
+	private function HouseEnter(player:Player, house:FlxSprite) {
+		FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
+			if (levelDataKind == FirstVillage) {
+				FlxG.switchState(new PlayState(Data.LevelDatasKind.House));
+			} else {
+				FlxG.switchState(new PlayState(Data.LevelDatasKind.FirstVillage));
+			}
+			FlxG.camera.fade(FlxColor.BLACK, 0.3, true);
+		});
 	}
 	
 	private function playerPickup(player:Player, pickup:Pickup):Void
@@ -260,6 +311,7 @@ class PlayState extends FlxState
 				case LayerMode.Tiles:
 					trace('${layer.name}: Tiles');
 					// Never reached ? Tiles by default
+					processTileLayer(layer, levelData, tilemapOver); // TODO: just in case
 				default:
 					trace('${layer.name}: Default, probably Tiles');
 					// TODO: Make generic
