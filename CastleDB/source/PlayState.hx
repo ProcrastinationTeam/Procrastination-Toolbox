@@ -190,25 +190,25 @@ class PlayState extends FlxState
 		
 		/////////////////////////////////////////////////////////////////////////////
 		// SIMPLE CAMERA
-		//FlxG.camera.follow(player, FlxCameraFollowStyle.LOCKON, 0.5);
-		//FlxG.camera.zoom = 1.5;
-		//
-		//tilemapGround.follow(FlxG.camera, 0, true);
+		FlxG.camera.follow(player, FlxCameraFollowStyle.LOCKON, 0.5);
+		FlxG.camera.bgColor = FlxColor.BLUE;
+		
+		tilemapGround.follow(FlxG.camera, 0, true);
 		/////////////////////////////////////////////////////////////////////////////
 		
 		/////////////////////////////////////////////////////////////////////////////
 		// WEIRD CAMERA
-		var cam:FlxCamera = FlxG.camera;
-		_zoomCam = new FlxZoomCamera(Std.int(cam.x), Std.int(cam.y), cam.width, cam.height, 1.5);
-		_zoomCam.follow(player, FlxCameraFollowStyle.LOCKON, 0);
-		
-		tilemapGround.follow(_zoomCam, 0, true);
-		_zoomCam.zoomMargin = 1;
-		_zoomCam.zoomSpeed = 1;
-		_zoomCam.bgColor = FlxColor.BLUE;
-		
-		// Reset the camera list by replacing the default cam with _zoomCam
-		FlxG.cameras.reset(_zoomCam);
+		//var cam:FlxCamera = FlxG.camera;
+		//_zoomCam = new FlxZoomCamera(Std.int(cam.x), Std.int(cam.y), cam.width, cam.height, 1);
+		//_zoomCam.follow(player, FlxCameraFollowStyle.LOCKON, 0);
+		//
+		//tilemapGround.follow(_zoomCam, 0, true);
+		//_zoomCam.zoomMargin = 1;
+		//_zoomCam.zoomSpeed = 1;
+		//_zoomCam.bgColor = FlxColor.BLUE;
+		//
+		//// Reset the camera list by replacing the default cam with _zoomCam
+		//FlxG.cameras.reset(_zoomCam);
 		/////////////////////////////////////////////////////////////////////////////
 		
 		for (trigger in levelData.triggers) {
@@ -226,8 +226,6 @@ class PlayState extends FlxState
 				}
 			}
 		}
-		
-		trace('(${FlxG.camera.scroll.x}, ${FlxG.camera.scroll.y})');
 	}
 
 	override public function update(elapsed:Float):Void
@@ -258,8 +256,6 @@ class PlayState extends FlxState
 		FlxG.collide(player, collisionsGroup);
 		
 		FlxG.overlap(player, houseSprite, HouseEnter);
-		
-		trace('(${FlxG.camera.scroll.x}, ${FlxG.camera.scroll.y})');
 	}
 	
 	private function HouseEnter(player:Player, house:FlxSprite) {

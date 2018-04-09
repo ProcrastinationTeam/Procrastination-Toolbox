@@ -30,7 +30,7 @@ class Player extends FlxSprite
 		animation.play("idle");
 		
 		drag.x = drag.y = 1600;
-		
+
 		setSize(8, 6);
 		offset.set(4, 10);
 

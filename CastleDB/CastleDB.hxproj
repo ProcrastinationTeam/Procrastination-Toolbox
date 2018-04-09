@@ -21,7 +21,7 @@
     <class path="C:\HaxeToolkit\haxe\lib\lime\2,9,1" />
     <class path="C:\HaxeToolkit\haxe\lib\hscript\2,1,1" />
     <class path="C:\HaxeToolkit\haxe\lib\flixel-addons\2,5,0" />
-    <class path="C:\HaxeToolkit\haxe\lib\castle\1,5,0" />
+    <class path="C:\HaxeToolkit\haxe\lib\castle\git" />
     <class path="source" />
     <class path="C:\HaxeToolkit\haxe\lib\openfl\3,6,1\extern" />
     <class path="export\debug\windows\neko\haxe" />
@@ -33,7 +33,7 @@
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="False" />
-    <option additional="--remap flash:openfl&#xA;--macro flixel.system.macros.FlxDefines.run()&#xA;-debug " />
+    <option additional="--remap flash:openfl&#xA;--macro flixel.system.macros.FlxDefines.run()&#xA;--times &#xA;-debug " />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
