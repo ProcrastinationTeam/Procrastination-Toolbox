@@ -7,6 +7,7 @@ import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.FlxCamera;
+import flixel.util.FlxSort;
 
 //var jdffdgdfg:cdb.Data.TilesetProps;
 
@@ -49,6 +50,10 @@ class PlayState extends FlxState
 	private var tilemapsGroundBorders	: FlxTypedGroup<FlxTilemap>		= new FlxTypedGroup<FlxTilemap>();
 	private var tilemapObjects 			: FlxTilemapExt					= new FlxTilemapExt();
 	private var tilemapOver 			: FlxTilemap					= new FlxTilemap();
+	
+	private var objectsGroup			: FlxSpriteGroup				= new FlxSpriteGroup();
+	
+	private var sortableGroup			: FlxSpriteGroup				= new FlxSpriteGroup();
 	
 	///////////////////////////////
 	// From lowest to highest priority of collision (each successive one overrides the previous behaviour if there was one)
@@ -161,7 +166,35 @@ class PlayState extends FlxState
 		add(tilemapsGroundBorders);
 		
 		// Then objects (mostly non interactive doodads like trees, rocks, etc)
-		add(tilemapObjects);
+		//add(tilemapObjects);
+		//add(objectsGroup);
+		
+		// Then the over layer (top of trees and cliffs ?)
+		add(tilemapOver);
+		
+		// Then the pickups (custom layer)
+		//add(pickupSprites);
+		
+		// The npcs
+		//add(npcSprites);
+		
+		// And finally the player
+		//add(player);
+		
+		// BRUTAL METHOD
+		for (item in objectsGroup) {
+			sortableGroup.add(item);
+		}
+		for (item in pickupSprites) {
+			sortableGroup.add(item);
+		}
+		for (item in npcSprites) {
+			sortableGroup.add(item);
+		}
+		sortableGroup.add(player);
+		//
+		
+		add(sortableGroup);
 		
 		// Adding the collisions group
 		// TODO: move ? 
@@ -173,18 +206,6 @@ class PlayState extends FlxState
 			}
 		}
 		add(collisionsGroup);
-		
-		// Then the over layer (top of trees and cliffs ?)
-		add(tilemapOver);
-		
-		// Then the pickups (custom layer)
-		add(pickupSprites);
-		
-		// The npcs
-		add(npcSprites);
-		
-		// And finally the player
-		add(player);
 		
 		// Camera setup
 		
@@ -227,10 +248,24 @@ class PlayState extends FlxState
 			}
 		}
 	}
+	
+	/**
+	* Comparateur perso pour trier les sprites par Y croissant (en tenant compte de leur hauteur)
+	* @param	Order
+	* @param	Obj1
+	* @param	Obj2
+	* @return
+	*/
+	public static function sortByY(Order:Int, Obj1:FlxObject, Obj2:FlxObject):Int
+	{
+		return Obj1.y + Obj1.height < Obj2.y + Obj2.height ? -Order : Order;
+	}
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+		
+		sortableGroup.sort(sortByY, FlxSort.DESCENDING);
 		
 		if(FlxG.keys.pressed.SHIFT) {
 			FlxG.camera.zoom += FlxG.mouse.wheel / 20.;
@@ -254,6 +289,7 @@ class PlayState extends FlxState
 		
 		FlxG.collide(player, npcSprites);
 		FlxG.collide(player, collisionsGroup);
+		FlxG.collide(player, objectsGroup);
 		
 		FlxG.overlap(player, houseSprite, HouseEnter);
 	}
@@ -331,7 +367,7 @@ class PlayState extends FlxState
 				case LayerMode.Tiles:
 					trace('${layer.name}: Tiles');
 					// Never reached ? Tiles by default
-					processTileLayer(layer, levelData, tilemapOver); // TODO: just in case
+					//processTileLayer(layer, levelData, tilemapOver); // TODO: just in case
 				default:
 					trace('${layer.name}: Default, probably Tiles');
 					// TODO: Make generic
@@ -515,17 +551,37 @@ class PlayState extends FlxState
 				
 				var prop:Dynamic = mapOfProps[tileId];
 				
+				var objectSprite:FlxSprite = tilemapObjects.tileToSprite(x, y, 0, function(tileProperty:FlxTileProperties) {
+					var sprite = new FlxSprite(x * objectsLayer.data.size, y * objectsLayer.data.size);
+					sprite.frame = tileProperty.graphic.frame;
+					sprite.immovable = true;
+					sprite.allowCollisions = FlxObject.ANY;
+					sprite.active = false;
+					sprite.moves = false;
+					sprite.setSize(objectsLayer.data.size, objectsLayer.data.size);
+					
+					return sprite;
+				});
+				objectsGroup.add(objectSprite);
+				
 				//trace('($x, $y) : $tileId => $prop');
 				if (prop != null && prop.collide != null) {
 					
+					
+					// If there already was a collision information for this coordinate, we discard it
+					// Object collision overrides ground collisions (ex: bridge)
+					arrayCollisions[y][x] = null;
+					
 					// FlxSprite to debug, FlxObject otherwise
-					var objectCollisionObject = new FlxSprite(x * objectsLayer.data.size, y * objectsLayer.data.size);
-					objectCollisionObject.immovable = true;
-					objectCollisionObject.allowCollisions = FlxObject.ANY;
-					objectCollisionObject.active = false;
-					objectCollisionObject.moves = false;
-					objectCollisionObject.setSize(objectsLayer.data.size, objectsLayer.data.size);
-					objectCollisionObject.makeGraphic(16, 16, FlxColor.TRANSPARENT);
+
+					//var objectCollisionObject = new FlxObject(x * objectsLayer.data.size, y * objectsLayer.data.size);
+					//objectCollisionObject.immovable = true;
+					//objectCollisionObject.allowCollisions = FlxObject.ANY;
+					//objectCollisionObject.active = false;
+					//objectCollisionObject.moves = false;
+					//objectCollisionObject.setSize(objectsLayer.data.size, objectsLayer.data.size);
+					//objectCollisionObject.makeGraphic(16, 16, FlxColor.TRANSPARENT);
+
 					//objectCollisionObject.exists = false; // trop violent
 					
 					switch(prop.collide) {
@@ -535,11 +591,12 @@ class PlayState extends FlxState
 						case Small:
 							// USE RESET
 							// If you just set x and y, "last" is not updated and fucks up collisions
-							objectCollisionObject.reset(objectCollisionObject.x + objectsLayer.data.size / 4, objectCollisionObject.y + objectsLayer.data.size / 4);
-							objectCollisionObject.setSize(objectsLayer.data.size / 2, objectsLayer.data.size / 2);
+							//objectSprite.reset(objectSprite.x + objectsLayer.data.size / 4, objectSprite.y + objectsLayer.data.size / 4);
+							objectSprite.offset.set(objectsLayer.data.size / 4, objectsLayer.data.size / 4);
+							objectSprite.setSize(objectsLayer.data.size / 2, objectsLayer.data.size / 2);
 							
 						case No:
-							objectCollisionObject.allowCollisions = FlxObject.NONE;
+							objectSprite.allowCollisions = FlxObject.NONE;
 							
 						case Top:
 							//
@@ -606,16 +663,14 @@ class PlayState extends FlxState
 							
 						// TODO: One is WALL (LEFT | RIGHT), the other is TOP | DOWN, but I don't know yet which is which
 						case Ladder:
-							objectCollisionObject.allowCollisions = FlxObject.WALL;
+							objectSprite.allowCollisions = FlxObject.WALL;
 							
 						case VLadder:
-							objectCollisionObject.allowCollisions = FlxObject.UP | FlxObject.DOWN;
+							objectSprite.allowCollisions = FlxObject.UP | FlxObject.DOWN;
 							
 						default: 
 							trace('($x, $y) : $tileId => $prop');
 					}
-					
-					arrayCollisions[y][x] = objectCollisionObject;
 				}
 			}
 		}
