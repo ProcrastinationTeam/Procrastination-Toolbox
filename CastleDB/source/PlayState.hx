@@ -601,55 +601,65 @@ class PlayState extends FlxState
 							
 						case Top:
 							//
-							//objectSprite.reset(objectSprite.x  + objectsLayer.data.size , objectSprite.y );
+							objectSprite.reset(objectSprite.x, objectSprite.y );
 							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 4);
 							objectSprite.offset.set(0, 0);
 							
 						case Right:
 							//
-							objectSprite.reset(objectSprite.x +  (objectsLayer.data.size / 4) * 3 , objectSprite.y );
+							objectSprite.reset(objectSprite.x  + (objectsLayer.data.size / 4) * 3, objectSprite.y );
 							objectSprite.setSize(objectsLayer.data.size / 4, objectsLayer.data.size);
+							objectSprite.offset.set(  (objectsLayer.data.size / 4) * 3, 0);
 							
 						case Bottom:
 							//
 							objectSprite.reset(objectSprite.x , objectSprite.y + (objectsLayer.data.size / 4) * 3  );
 							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 4);
+							objectSprite.offset.set(0, (objectsLayer.data.size / 4) * 3);
 							
 						case Left:
 							//
-							objectSprite.reset(objectSprite.x, objectSprite.y );
+							objectSprite.reset(objectSprite.x, objectSprite.y);
 							objectSprite.setSize(objectsLayer.data.size / 4, objectsLayer.data.size);
+							objectSprite.offset.set( (objectsLayer.data.size / 4),0);
+							
 							
 						case HalfTop:
 							//
-							objectSprite.reset(objectSprite.x , objectSprite.y );
+							objectSprite.reset(objectSprite.x , objectSprite.y);
 							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 2);
+							objectSprite.offset.set(0,0);
 							
 						case HalfBottom:
 							//
 							objectSprite.reset(objectSprite.x , objectSprite.y + (objectsLayer.data.size / 2));
 							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 2);
+							objectSprite.offset.set(0,objectsLayer.data.size / 2);
 							
 						case HalfLeft:
 							//
 							objectSprite.reset(objectSprite.x, objectSprite.y );
-							objectSprite.setSize(objectsLayer.data.size/2, objectsLayer.data.size);
+							objectSprite.setSize(objectsLayer.data.size / 2, objectsLayer.data.size);
+							objectSprite.offset.set(0,0);
 							
 						case HalfRight:
 							//
 							objectSprite.reset(objectSprite.x +  (objectsLayer.data.size / 2) , objectSprite.y );
 							objectSprite.setSize(objectsLayer.data.size / 2, objectsLayer.data.size);
+							objectSprite.offset.set((objectsLayer.data.size / 2),0);
 							
 							
 						case Vertical:
 							//
 							objectSprite.reset(objectSprite.x+ (objectsLayer.data.size / 3)  , objectSprite.y   );
 							objectSprite.setSize(objectsLayer.data.size / 4 , objectsLayer.data.size );
+							objectSprite.offset.set((objectsLayer.data.size / 3),0);
 							
 						case Horizontal:
 							//
 							objectSprite.reset(objectSprite.x  , objectSprite.y + (objectsLayer.data.size / 3)   );
 							objectSprite.setSize(objectsLayer.data.size , objectsLayer.data.size  / 4);
+							objectSprite.offset.set(0,(objectsLayer.data.size / 3));
 							
 						case CornerTR:
 							//
