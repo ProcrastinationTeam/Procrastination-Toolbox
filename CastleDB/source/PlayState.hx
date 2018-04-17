@@ -591,63 +591,65 @@ class PlayState extends FlxState
 						case Small:
 							// USE RESET
 							// If you just set x and y, "last" is not updated and fucks up collisions
-							//objectSprite.reset(objectSprite.x + objectsLayer.data.size / 4, objectSprite.y + objectsLayer.data.size / 4);
-							objectSprite.offset.set(objectsLayer.data.size / 4, objectsLayer.data.size / 4);
+							objectSprite.reset(objectSprite.x + objectsLayer.data.size / 4, objectSprite.y + objectsLayer.data.size / 4);
 							objectSprite.setSize(objectsLayer.data.size / 2, objectsLayer.data.size / 2);
+							objectSprite.offset.set(objectsLayer.data.size / 4, objectsLayer.data.size / 4);
+	
 							
 						case No:
 							objectSprite.allowCollisions = FlxObject.NONE;
 							
 						case Top:
 							//
-							objectCollisionObject.reset(objectCollisionObject.x , objectCollisionObject.y );
-							objectCollisionObject.setSize(objectsLayer.data.size, objectsLayer.data.size / 4);
+							//objectSprite.reset(objectSprite.x  + objectsLayer.data.size , objectSprite.y );
+							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 4);
+							objectSprite.offset.set(0, 0);
 							
 						case Right:
 							//
-							objectCollisionObject.reset(objectCollisionObject.x +  (objectsLayer.data.size / 4) * 3 , objectCollisionObject.y );
-							objectCollisionObject.setSize(objectsLayer.data.size / 4, objectsLayer.data.size);
+							objectSprite.reset(objectSprite.x +  (objectsLayer.data.size / 4) * 3 , objectSprite.y );
+							objectSprite.setSize(objectsLayer.data.size / 4, objectsLayer.data.size);
 							
 						case Bottom:
 							//
-							objectCollisionObject.reset(objectCollisionObject.x , objectCollisionObject.y + (objectsLayer.data.size / 4) * 3  );
-							objectCollisionObject.setSize(objectsLayer.data.size, objectsLayer.data.size / 4);
+							objectSprite.reset(objectSprite.x , objectSprite.y + (objectsLayer.data.size / 4) * 3  );
+							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 4);
 							
 						case Left:
 							//
-							objectCollisionObject.reset(objectCollisionObject.x, objectCollisionObject.y );
-							objectCollisionObject.setSize(objectsLayer.data.size / 4, objectsLayer.data.size);
+							objectSprite.reset(objectSprite.x, objectSprite.y );
+							objectSprite.setSize(objectsLayer.data.size / 4, objectsLayer.data.size);
 							
 						case HalfTop:
 							//
-							objectCollisionObject.reset(objectCollisionObject.x , objectCollisionObject.y );
-							objectCollisionObject.setSize(objectsLayer.data.size, objectsLayer.data.size / 2);
+							objectSprite.reset(objectSprite.x , objectSprite.y );
+							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 2);
 							
 						case HalfBottom:
 							//
-							objectCollisionObject.reset(objectCollisionObject.x , objectCollisionObject.y + (objectsLayer.data.size / 2));
-							objectCollisionObject.setSize(objectsLayer.data.size, objectsLayer.data.size / 2);
+							objectSprite.reset(objectSprite.x , objectSprite.y + (objectsLayer.data.size / 2));
+							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 2);
 							
 						case HalfLeft:
 							//
-							objectCollisionObject.reset(objectCollisionObject.x, objectCollisionObject.y );
-							objectCollisionObject.setSize(objectsLayer.data.size/2, objectsLayer.data.size);
+							objectSprite.reset(objectSprite.x, objectSprite.y );
+							objectSprite.setSize(objectsLayer.data.size/2, objectsLayer.data.size);
 							
 						case HalfRight:
 							//
-							objectCollisionObject.reset(objectCollisionObject.x +  (objectsLayer.data.size / 2) , objectCollisionObject.y );
-							objectCollisionObject.setSize(objectsLayer.data.size / 2, objectsLayer.data.size);
+							objectSprite.reset(objectSprite.x +  (objectsLayer.data.size / 2) , objectSprite.y );
+							objectSprite.setSize(objectsLayer.data.size / 2, objectsLayer.data.size);
 							
 							
 						case Vertical:
 							//
-							objectCollisionObject.reset(objectCollisionObject.x+ (objectsLayer.data.size / 3)  , objectCollisionObject.y   );
-							objectCollisionObject.setSize(objectsLayer.data.size / 4 , objectsLayer.data.size );
+							objectSprite.reset(objectSprite.x+ (objectsLayer.data.size / 3)  , objectSprite.y   );
+							objectSprite.setSize(objectsLayer.data.size / 4 , objectsLayer.data.size );
 							
 						case Horizontal:
 							//
-							objectCollisionObject.reset(objectCollisionObject.x  , objectCollisionObject.y + (objectsLayer.data.size / 3)   );
-							objectCollisionObject.setSize(objectsLayer.data.size , objectsLayer.data.size  / 4);
+							objectSprite.reset(objectSprite.x  , objectSprite.y + (objectsLayer.data.size / 3)   );
+							objectSprite.setSize(objectsLayer.data.size , objectsLayer.data.size  / 4);
 							
 						case CornerTR:
 							//
