@@ -203,29 +203,11 @@ class PlayState extends FlxState
 		add(collisionsGroup);
 		
 		// Camera setup
-		
-		/////////////////////////////////////////////////////////////////////////////
-		// SIMPLE CAMERA
-		FlxG.camera.follow(player, FlxCameraFollowStyle.LOCKON, 0.5);
-		FlxG.camera.bgColor = FlxColor.BLUE;
+s		FlxG.camera.follow(player, FlxCameraFollowStyle.LOCKON, 0.5);
+		FlxG.camera.snapToTarget();
+		FlxG.camera.bgColor = FlxColor.BLACK;
 		
 		tilemapGround.follow(FlxG.camera, 0, true);
-		/////////////////////////////////////////////////////////////////////////////
-		
-		/////////////////////////////////////////////////////////////////////////////
-		// WEIRD CAMERA
-		//var cam:FlxCamera = FlxG.camera;
-		//_zoomCam = new FlxZoomCamera(Std.int(cam.x), Std.int(cam.y), cam.width, cam.height, 1);
-		//_zoomCam.follow(player, FlxCameraFollowStyle.LOCKON, 0);
-		//
-		//tilemapGround.follow(_zoomCam, 0, true);
-		//_zoomCam.zoomMargin = 1;
-		//_zoomCam.zoomSpeed = 1;
-		//_zoomCam.bgColor = FlxColor.BLUE;
-		//
-		//// Reset the camera list by replacing the default cam with _zoomCam
-		//FlxG.cameras.reset(_zoomCam);
-		/////////////////////////////////////////////////////////////////////////////
 		
 		for (trigger in levelData.triggers) {
 			//trace(trigger);
