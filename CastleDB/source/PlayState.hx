@@ -203,7 +203,7 @@ class PlayState extends FlxState
 		add(collisionsGroup);
 		
 		// Camera setup
-s		FlxG.camera.follow(player, FlxCameraFollowStyle.LOCKON, 0.5);
+		FlxG.camera.follow(player, FlxCameraFollowStyle.LOCKON, 0.5);
 		FlxG.camera.snapToTarget();
 		FlxG.camera.bgColor = FlxColor.BLACK;
 		
