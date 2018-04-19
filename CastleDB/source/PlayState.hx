@@ -56,6 +56,9 @@ class PlayState extends FlxState
 	
 	private var sortableGroup			: FlxSpriteGroup				= new FlxSpriteGroup();
 	
+	private var changeScreenTriggers	: FlxSpriteGroup				= new FlxSpriteGroup();
+	private var mapOfTriggers			: Map<FlxSprite, Data.Action> 	= new Map<FlxSprite, Data.Action>();
+	
 	///////////////////////////////
 	// From lowest to highest priority of collision (each successive one overrides the previous behaviour if there was one)
 	// 1: Ground 	(water)
@@ -159,6 +162,9 @@ class PlayState extends FlxState
 		// Process pickups
 		processPickups(levelData.pickups);
 		
+		// Process triggers
+		processTriggerZones(levelData.triggers);
+		
 		//////////////////////////////////////// Add all the layers in the right order
 		// First "simple" ground tiles
 		add(tilemapGround);
@@ -191,6 +197,9 @@ class PlayState extends FlxState
 		// Then the over layer (top of trees and cliffs ?)
 		add(tilemapOver);
 		
+		// Then, trigger zones
+		add(changeScreenTriggers);
+		
 		// Adding the collisions group
 		// TODO: move ? 
 		for (y in 0...levelData.height) {
@@ -208,22 +217,6 @@ class PlayState extends FlxState
 		FlxG.camera.bgColor = FlxColor.BLACK;
 		
 		tilemapGround.follow(FlxG.camera, 0, true);
-		
-		for (trigger in levelData.triggers) {
-			//trace(trigger);
-			if (trigger.action != null) {
-				var parameters = trigger.action.getParameters();
-				//trace(parameters[0]);
-				if (parameters[0] == "House" || parameters[0] == "FirstVillage") {
-					//trace("omfg");
-					trace(trigger);
-					houseSprite = new FlxSprite(trigger.x * levelData.props.tileSize, trigger.y * levelData.props.tileSize);
-					houseSprite.setSize(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height);
-					houseSprite.makeGraphic(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height, FlxColor.TRANSPARENT);
-					add(houseSprite);
-				}
-			}
-		}
 	}
 	
 	/**
@@ -252,7 +245,8 @@ class PlayState extends FlxState
 		FlxG.collide(player, objectsGroup);
 		FlxG.collide(player, groundObjectsGroup);
 		
-		FlxG.overlap(player, houseSprite, HouseEnter);
+		//FlxG.overlap(player, houseSprite, HouseEnter);
+		FlxG.overlap(player, changeScreenTriggers, ChangeScreenTriggerCallback);
 		
 		// Debug
 		#if debug
@@ -276,15 +270,30 @@ class PlayState extends FlxState
 		#end
 	}
 	
-	private function HouseEnter(player:Player, house:FlxSprite) {
-		FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
-			if (levelDataKind == FirstVillage) {
-				FlxG.switchState(new PlayState(Data.LevelDatasKind.House));
-			} else {
-				FlxG.switchState(new PlayState(Data.LevelDatasKind.FirstVillage));
-			}
-			FlxG.camera.fade(FlxColor.BLACK, 0.3, true);
-		});
+	//private function HouseEnter(player:Player, house:FlxSprite) {
+		//FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
+			//if (levelDataKind == FirstVillage) {
+				//FlxG.switchState(new PlayState(Data.LevelDatasKind.House));
+			//} else {
+				//FlxG.switchState(new PlayState(Data.LevelDatasKind.FirstVillage));
+			//}
+			//FlxG.camera.fade(FlxColor.BLACK, 0.3, true);
+		//});
+	//}
+	
+	private function ChangeScreenTriggerCallback(player:Player, triggerSprite:FlxSprite) {
+		var action:Data.Action = mapOfTriggers.get(triggerSprite);
+		
+		// Sucky way to cast it as a Goto, even though we're sure it is
+		switch(action) {
+			case Data.Action.Goto(l, anchor):
+				FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
+					FlxG.switchState(new PlayState(l.level));
+					FlxG.camera.fade(FlxColor.BLACK, 0.3, true);
+				});
+			default:
+				// Never happens
+		}
 	}
 	
 	private function playerPickup(player:Player, pickup:Pickup):Void
@@ -306,9 +315,9 @@ class PlayState extends FlxState
 			}
 		}
 		
-		for (key in mapOfProps.keys()) {
-			trace('[prop] $key => ${mapOfProps[key]}');
-		}
+		//for (key in mapOfProps.keys()) {
+			//trace('[prop] $key => ${mapOfProps[key]}');
+		//}
 	}
 	
 	// the first tile id is 0
@@ -329,9 +338,9 @@ class PlayState extends FlxState
 			}
 		}
 		
-		for (key in mapOfObjects.keys()) {
-			trace('[object] $key => ${mapOfObjects[key]}');
-		}
+		//for (key in mapOfObjects.keys()) {
+			//trace('[object] $key => ${mapOfObjects[key]}');
+		//}
 	}
 	
 	private function processLayers(levelData:Data.LevelDatas):Void {
@@ -577,7 +586,7 @@ class PlayState extends FlxState
 							objectSprite.offset.set(offsetX, offsetY);
 							
 						case No:
-							trace(prop);
+							//trace(prop);
 							objectSprite.allowCollisions = FlxObject.NONE;
 							
 						case Top:
@@ -856,8 +865,8 @@ class PlayState extends FlxState
 							//trace('($x, $y) : $tileId => $prop');
 					}
 				} else {
-					// No object at this position
-					trace('($x, $y)');
+					// No object with collision at this position
+					//trace('($x, $y)');
 				}
 			}
 		}
@@ -892,6 +901,41 @@ class PlayState extends FlxState
 		for (pickup in pickups) {
 			var pickupSprite = new Pickup(pickup);
 			pickupSprites.add(pickupSprite);
+		}
+	}
+	
+	private function processTriggerZones(triggers:ArrayRead < Data.LevelDatas_triggers > ):Void {
+		for (trigger in triggers) {
+			switch(trigger.action) {
+				case Data.Action.Anchor(id):
+					// Spawn point
+					trace('Anchor - id: [$id]');
+					
+				case Data.Action.Goto(l, anchor):
+					// Departure point
+					trace('Goto - l: [$l] - anchor: [$anchor]');
+					//if (l == "House" || l == "FirstVillage") {
+						//houseSprite = new FlxSprite(trigger.x * levelData.props.tileSize, trigger.y * levelData.props.tileSize);
+						//houseSprite.setSize(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height);
+						//houseSprite.makeGraphic(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height, FlxColor.TRANSPARENT);
+						//add(houseSprite);
+					//}
+					
+					var sprite = new FlxSprite(trigger.x * levelData.props.tileSize, trigger.y * levelData.props.tileSize);
+					sprite.setSize(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height);
+					sprite.makeGraphic(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height, FlxColor.TRANSPARENT);
+					sprite.immovable = true;
+					sprite.active = false;
+					sprite.moves = false;
+					//sprite.allowCollisions = FlxObject.NONE;
+					
+					//add(sprite);
+					changeScreenTriggers.add(sprite);
+					mapOfTriggers.set(sprite, trigger.action);
+					
+				case Data.Action.ScrollStop:
+					// Osef (scrollbounds ?)
+			}
 		}
 	}
 	

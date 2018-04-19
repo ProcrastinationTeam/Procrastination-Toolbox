@@ -858,17 +858,6 @@
 							]
 						},
 						{
-							"x": 24,
-							"y": 3,
-							"width": 3,
-							"height": 1,
-							"action": [
-								1,
-								"WorldMap",
-								"firstVillageNorth"
-							]
-						},
-						{
 							"x": 25,
 							"y": 4,
 							"width": 1,
@@ -895,23 +884,6 @@
 							"action": [
 								1,
 								"House"
-							]
-						},
-						{
-							"x": 27,
-							"y": 21,
-							"width": 1,
-							"height": 1
-						},
-						{
-							"x": 45,
-							"y": 21,
-							"width": 1,
-							"height": 3,
-							"action": [
-								1,
-								"WorldMap",
-								"firstVillageSouth"
 							]
 						},
 						{
@@ -1085,7 +1057,7 @@
 					"triggers": [
 						{
 							"x": 28,
-							"y": 24,
+							"y": 25,
 							"width": 2,
 							"height": 1,
 							"action": [
@@ -1098,7 +1070,7 @@
 					"npcs": [
 						{
 							"x": 29,
-							"y": 23,
+							"y": 24,
 							"kind": "Hero",
 							"Name": ""
 						}
@@ -3943,8 +3915,7 @@
 				},
 				{
 					"typeStr": "9:Action",
-					"name": "action",
-					"opt": true
+					"name": "action"
 				}
 			]
 		},
@@ -4203,7 +4174,7 @@
 					"args": [
 						{
 							"name": "l",
-							"typeStr": "1"
+							"typeStr": "6:levelDatas"
 						},
 						{
 							"name": "anchor",
