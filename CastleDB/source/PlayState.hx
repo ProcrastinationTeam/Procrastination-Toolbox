@@ -165,36 +165,27 @@ class PlayState extends FlxState
 		// Then borders (autotiling)
 		add(tilemapsGroundBorders);
 		
-		// Then objects (mostly non interactive doodads like trees, rocks, etc)
-		//add(tilemapObjects);
-		//add(objectsGroup);
-		
-		// Then the over layer (top of trees and cliffs ?)
-		add(tilemapOver);
-		
-		// Then the pickups (custom layer)
-		//add(pickupSprites);
-		
-		// The npcs
-		//add(npcSprites);
-		
-		// And finally the player
-		//add(player);
-		
-		// BRUTAL METHOD
+		//////// Then "sortable" items (player, npcs, pickups, etc) so we can manipulate the draw order
+		// objects (mostly non interactive doodads like trees, rocks, etc)
 		for (item in objectsGroup) {
 			sortableGroup.add(item);
 		}
+		// pickups (custom layer)
 		for (item in pickupSprites) {
 			sortableGroup.add(item);
 		}
+		// npcs
 		for (item in npcSprites) {
 			sortableGroup.add(item);
 		}
+		// player
 		sortableGroup.add(player);
-		//
 		
 		add(sortableGroup);
+		////////
+		
+		// Then the over layer (top of trees and cliffs ?)
+		add(tilemapOver);
 		
 		// Adding the collisions group
 		// TODO: move ? 
@@ -256,17 +247,28 @@ class PlayState extends FlxState
 	* @param	Obj2
 	* @return
 	*/
-	public static function sortByY(Order:Int, Obj1:FlxObject, Obj2:FlxObject):Int
-	{
+	public static function sortByY(Order:Int, Obj1:FlxObject, Obj2:FlxObject):Int {
 		return Obj1.y + Obj1.height < Obj2.y + Obj2.height ? -Order : Order;
 	}
 
-	override public function update(elapsed:Float):Void
-	{
+	override public function update(elapsed:Float):Void {
+		// Mandatory
 		super.update(elapsed);
 		
+		// Sort objects by their y value
 		sortableGroup.sort(sortByY, FlxSort.DESCENDING);
 		
+		// Collisions handling
+		FlxG.overlap(player, pickupSprites, playerPickup);
+		
+		FlxG.collide(player, npcSprites);
+		FlxG.collide(player, collisionsGroup);
+		FlxG.collide(player, objectsGroup);
+		
+		FlxG.overlap(player, houseSprite, HouseEnter);
+		
+		// Debug
+		#if debug
 		if(FlxG.keys.pressed.SHIFT) {
 			FlxG.camera.zoom += FlxG.mouse.wheel / 20.;
 		}
@@ -284,14 +286,7 @@ class PlayState extends FlxState
 		if (FlxG.keys.justPressed.THREE) {
 			tilemapOver.visible = !tilemapOver.visible;
 		}
-		
-		FlxG.overlap(player, pickupSprites, playerPickup);
-		
-		FlxG.collide(player, npcSprites);
-		FlxG.collide(player, collisionsGroup);
-		FlxG.collide(player, objectsGroup);
-		
-		FlxG.overlap(player, houseSprite, HouseEnter);
+		#end
 	}
 	
 	private function HouseEnter(player:Player, house:FlxSprite) {
@@ -567,22 +562,11 @@ class PlayState extends FlxState
 				//trace('($x, $y) : $tileId => $prop');
 				if (prop != null && prop.collide != null) {
 					
+					trace(prop);
 					
 					// If there already was a collision information for this coordinate, we discard it
 					// Object collision overrides ground collisions (ex: bridge)
 					arrayCollisions[y][x] = null;
-					
-					// FlxSprite to debug, FlxObject otherwise
-
-					//var objectCollisionObject = new FlxObject(x * objectsLayer.data.size, y * objectsLayer.data.size);
-					//objectCollisionObject.immovable = true;
-					//objectCollisionObject.allowCollisions = FlxObject.ANY;
-					//objectCollisionObject.active = false;
-					//objectCollisionObject.moves = false;
-					//objectCollisionObject.setSize(objectsLayer.data.size, objectsLayer.data.size);
-					//objectCollisionObject.makeGraphic(16, 16, FlxColor.TRANSPARENT);
-
-					//objectCollisionObject.exists = false; // trop violent
 					
 					switch(prop.collide) {
 						case Full:
@@ -591,91 +575,249 @@ class PlayState extends FlxState
 						case Small:
 							// USE RESET
 							// If you just set x and y, "last" is not updated and fucks up collisions
-							objectSprite.reset(objectSprite.x + objectsLayer.data.size / 4, objectSprite.y + objectsLayer.data.size / 4);
-							objectSprite.setSize(objectsLayer.data.size / 2, objectsLayer.data.size / 2);
-							objectSprite.offset.set(objectsLayer.data.size / 4, objectsLayer.data.size / 4);
-	
+							
+							var offsetX = objectsLayer.data.size / 4;
+							var offsetY = objectsLayer.data.size / 4;
+							var sizeX = objectsLayer.data.size / 2;
+							var sizeY = objectsLayer.data.size / 2;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case No:
 							objectSprite.allowCollisions = FlxObject.NONE;
 							
 						case Top:
-							//
-							objectSprite.reset(objectSprite.x, objectSprite.y );
-							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 4);
-							objectSprite.offset.set(0, 0);
+							var offsetX = 0;
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case Right:
-							//
-							objectSprite.reset(objectSprite.x  + (objectsLayer.data.size / 4) * 3, objectSprite.y );
-							objectSprite.setSize(objectsLayer.data.size / 4, objectsLayer.data.size);
-							objectSprite.offset.set(  (objectsLayer.data.size / 4) * 3, 0);
+							var offsetX = objectsLayer.data.size - (objectsLayer.data.size / 4);
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size / 4;
+							var sizeY = objectsLayer.data.size;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case Bottom:
-							//
-							objectSprite.reset(objectSprite.x , objectSprite.y + (objectsLayer.data.size / 4) * 3  );
-							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 4);
-							objectSprite.offset.set(0, (objectsLayer.data.size / 4) * 3);
+							var offsetX = 0;
+							var offsetY = objectsLayer.data.size - (objectsLayer.data.size / 4);
+							var sizeX = objectsLayer.data.size;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case Left:
-							//
-							objectSprite.reset(objectSprite.x, objectSprite.y);
-							objectSprite.setSize(objectsLayer.data.size / 4, objectsLayer.data.size);
-							objectSprite.offset.set( (objectsLayer.data.size / 4),0);
+							var offsetX = 0;
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size / 4;
+							var sizeY = objectsLayer.data.size;
 							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case HalfTop:
-							//
-							objectSprite.reset(objectSprite.x , objectSprite.y);
-							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 2);
-							objectSprite.offset.set(0,0);
+							var offsetX = 0;
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size;
+							var sizeY = objectsLayer.data.size / 2;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case HalfBottom:
-							//
-							objectSprite.reset(objectSprite.x , objectSprite.y + (objectsLayer.data.size / 2));
-							objectSprite.setSize(objectsLayer.data.size, objectsLayer.data.size / 2);
-							objectSprite.offset.set(0,objectsLayer.data.size / 2);
+							var offsetX = 0;
+							var offsetY = objectsLayer.data.size / 2;
+							var sizeX = objectsLayer.data.size;
+							var sizeY = objectsLayer.data.size / 2;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case HalfLeft:
-							//
-							objectSprite.reset(objectSprite.x, objectSprite.y );
-							objectSprite.setSize(objectsLayer.data.size / 2, objectsLayer.data.size);
-							objectSprite.offset.set(0,0);
+							var offsetX = 0;
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size / 2;
+							var sizeY = objectsLayer.data.size;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case HalfRight:
-							//
-							objectSprite.reset(objectSprite.x +  (objectsLayer.data.size / 2) , objectSprite.y );
-							objectSprite.setSize(objectsLayer.data.size / 2, objectsLayer.data.size);
-							objectSprite.offset.set((objectsLayer.data.size / 2),0);
+							var offsetX = objectsLayer.data.size / 2;
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size / 2;
+							var sizeY = objectsLayer.data.size;
 							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case Vertical:
-							//
-							objectSprite.reset(objectSprite.x+ (objectsLayer.data.size / 3)  , objectSprite.y   );
-							objectSprite.setSize(objectsLayer.data.size / 4 , objectsLayer.data.size );
-							objectSprite.offset.set((objectsLayer.data.size / 3),0);
+							var offsetX = objectsLayer.data.size / 3;
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size / 4;
+							var sizeY = objectsLayer.data.size;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case Horizontal:
-							//
-							objectSprite.reset(objectSprite.x  , objectSprite.y + (objectsLayer.data.size / 3)   );
-							objectSprite.setSize(objectsLayer.data.size , objectsLayer.data.size  / 4);
-							objectSprite.offset.set(0,(objectsLayer.data.size / 3));
+							var offsetX = 0;
+							var offsetY = objectsLayer.data.size / 3;
+							var sizeX = objectsLayer.data.size;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
 							
 						case CornerTR:
-							//
+							// TODO: horrible
+							var tempSprite = new FlxSprite(objectSprite.x, objectSprite.y);
+							tempSprite.makeGraphic(objectsLayer.data.size, objectsLayer.data.size, FlxColor.TRANSPARENT);
+							tempSprite.immovable = true;
+							tempSprite.allowCollisions = FlxObject.ANY;
+							tempSprite.active = false;
+							tempSprite.moves = false;
+							
+							// TOP
+							var offsetX = 0;
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
+							
+							// RIGHT
+							var offsetX2 = objectsLayer.data.size - (objectsLayer.data.size / 4);
+							var offsetY2 = 0;
+							var sizeX2 = objectsLayer.data.size / 4;
+							var sizeY2 = objectsLayer.data.size;
+							
+							tempSprite.reset(tempSprite.x + offsetX2, tempSprite.y + offsetY2);
+							tempSprite.setSize(sizeX2, sizeY2);
+							tempSprite.offset.set(offsetX2, offsetY2);
+							
+							objectsGroup.add(tempSprite);
 							
 						case CornerBR:
-							//
+							// TODO: horrible
+							var tempSprite = new FlxSprite(objectSprite.x, objectSprite.y);
+							tempSprite.makeGraphic(objectsLayer.data.size, objectsLayer.data.size, FlxColor.TRANSPARENT);
+							tempSprite.immovable = true;
+							tempSprite.allowCollisions = FlxObject.ANY;
+							tempSprite.active = false;
+							tempSprite.moves = false;
+							
+							// BOTTOM
+							var offsetX = 0;
+							var offsetY = objectsLayer.data.size - (objectsLayer.data.size / 4);
+							var sizeX = objectsLayer.data.size;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
+							
+							// RIGHT
+							var offsetX2 = objectsLayer.data.size - (objectsLayer.data.size / 4);
+							var offsetY2 = 0;
+							var sizeX2 = objectsLayer.data.size / 4;
+							var sizeY2 = objectsLayer.data.size;
+							
+							tempSprite.reset(tempSprite.x + offsetX2, tempSprite.y + offsetY2);
+							tempSprite.setSize(sizeX2, sizeY2);
+							tempSprite.offset.set(offsetX2, offsetY2);
+							
+							objectsGroup.add(tempSprite);
+							
+							trace(objectSprite);
+							trace(tempSprite);
 							
 						case CornerBL:
-							//
+							// TODO: horrible
+							var tempSprite = new FlxSprite(objectSprite.x, objectSprite.y);
+							tempSprite.makeGraphic(objectsLayer.data.size, objectsLayer.data.size, FlxColor.TRANSPARENT);
+							tempSprite.immovable = true;
+							tempSprite.allowCollisions = FlxObject.ANY;
+							tempSprite.active = false;
+							tempSprite.moves = false;
+							
+							// BOTTOM
+							var offsetX = 0;
+							var offsetY = objectsLayer.data.size - (objectsLayer.data.size / 4);
+							var sizeX = objectsLayer.data.size;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
+							
+							// LEFT
+							var offsetX2 = 0;
+							var offsetY2 = 0;
+							var sizeX2 = objectsLayer.data.size / 4;
+							var sizeY2 = objectsLayer.data.size;
+							
+							tempSprite.reset(tempSprite.x + offsetX2, tempSprite.y + offsetY2);
+							tempSprite.setSize(sizeX2, sizeY2);
+							tempSprite.offset.set(offsetX2, offsetY2);
+							
+							objectsGroup.add(tempSprite);
 							
 						case CornerTL:
-							//
+							// TODO: horrible
+							var tempSprite = new FlxSprite(objectSprite.x, objectSprite.y);
+							tempSprite.makeGraphic(objectsLayer.data.size, objectsLayer.data.size, FlxColor.TRANSPARENT);
+							tempSprite.immovable = true;
+							tempSprite.allowCollisions = FlxObject.ANY;
+							tempSprite.active = false;
+							tempSprite.moves = false;
+							
+							// TOP
+							var offsetX = 0;
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
+							
+							// LEFT
+							var offsetX2 = 0;
+							var offsetY2 = 0;
+							var sizeX2 = objectsLayer.data.size / 4;
+							var sizeY2 = objectsLayer.data.size;
+							
+							tempSprite.reset(tempSprite.x + offsetX2, tempSprite.y + offsetY2);
+							tempSprite.setSize(sizeX2, sizeY2);
+							tempSprite.offset.set(offsetX2, offsetY2);
+							
+							objectsGroup.add(tempSprite);
 							
 						// TODO: One is WALL (LEFT | RIGHT), the other is TOP | DOWN, but I don't know yet which is which
 						case Ladder:
-							objectSprite.allowCollisions = FlxObject.WALL;
+							objectSprite.allowCollisions = FlxObject.LEFT | FlxObject.RIGHT; // ie FlxObject.WALL
 							
 						case VLadder:
 							objectSprite.allowCollisions = FlxObject.UP | FlxObject.DOWN;
