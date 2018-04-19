@@ -51,6 +51,7 @@ class PlayState extends FlxState
 	private var tilemapObjects 			: FlxTilemapExt					= new FlxTilemapExt();
 	private var tilemapOver 			: FlxTilemap					= new FlxTilemap();
 	
+	private var groundObjectsGroup		: FlxSpriteGroup				= new FlxSpriteGroup();
 	private var objectsGroup			: FlxSpriteGroup				= new FlxSpriteGroup();
 	
 	private var sortableGroup			: FlxSpriteGroup				= new FlxSpriteGroup();
@@ -163,7 +164,10 @@ class PlayState extends FlxState
 		add(tilemapGround);
 		
 		// Then borders (autotiling)
-		add(tilemapsGroundBorders);
+		add(tilemapsGroundBorders);	
+		
+		// Then "ground objects" (alway under the rest)
+		add(groundObjectsGroup);
 		
 		//////// Then "sortable" items (player, npcs, pickups, etc) so we can manipulate the draw order
 		// objects (mostly non interactive doodads like trees, rocks, etc)
@@ -264,6 +268,7 @@ class PlayState extends FlxState
 		FlxG.collide(player, npcSprites);
 		FlxG.collide(player, collisionsGroup);
 		FlxG.collide(player, objectsGroup);
+		FlxG.collide(player, groundObjectsGroup);
 		
 		FlxG.overlap(player, houseSprite, HouseEnter);
 		
@@ -550,19 +555,23 @@ class PlayState extends FlxState
 					var sprite = new FlxSprite(x * objectsLayer.data.size, y * objectsLayer.data.size);
 					sprite.frame = tileProperty.graphic.frame;
 					sprite.immovable = true;
-					sprite.allowCollisions = FlxObject.ANY;
+					sprite.allowCollisions = FlxObject.NONE;
 					sprite.active = false;
 					sprite.moves = false;
 					sprite.setSize(objectsLayer.data.size, objectsLayer.data.size);
 					
 					return sprite;
 				});
-				objectsGroup.add(objectSprite);
 				
-				//trace('($x, $y) : $tileId => $prop');
+				if (prop == null || prop.hideHero == null || prop.hideHero == 0) {
+					groundObjectsGroup.add(objectSprite);
+				} else {
+					objectsGroup.add(objectSprite);
+				}
+				
 				if (prop != null && prop.collide != null) {
 					
-					trace(prop);
+					objectSprite.allowCollisions = FlxObject.ANY;
 					
 					// If there already was a collision information for this coordinate, we discard it
 					// Object collision overrides ground collisions (ex: bridge)
@@ -586,6 +595,7 @@ class PlayState extends FlxState
 							objectSprite.offset.set(offsetX, offsetY);
 							
 						case No:
+							trace(prop);
 							objectSprite.allowCollisions = FlxObject.NONE;
 							
 						case Top:
@@ -688,6 +698,46 @@ class PlayState extends FlxState
 							objectSprite.setSize(sizeX, sizeY);
 							objectSprite.offset.set(offsetX, offsetY);
 							
+						case SmallTR:
+							var offsetX = objectsLayer.data.size - (objectsLayer.data.size / 4);
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size / 4;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
+							
+						case SmallBR:
+							var offsetX = objectsLayer.data.size - (objectsLayer.data.size / 4);
+							var offsetY = objectsLayer.data.size - (objectsLayer.data.size / 4);
+							var sizeX = objectsLayer.data.size / 4;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
+							
+						case SmallBL:
+							var offsetX = 0;
+							var offsetY = objectsLayer.data.size - (objectsLayer.data.size / 4);
+							var sizeX = objectsLayer.data.size / 4;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
+							
+						case SmallTL:
+							var offsetX = 0;
+							var offsetY = 0;
+							var sizeX = objectsLayer.data.size / 4;
+							var sizeY = objectsLayer.data.size / 4;
+							
+							objectSprite.reset(objectSprite.x + offsetX, objectSprite.y + offsetY);
+							objectSprite.setSize(sizeX, sizeY);
+							objectSprite.offset.set(offsetX, offsetY);
+							
 						case CornerTR:
 							// TODO: horrible
 							var tempSprite = new FlxSprite(objectSprite.x, objectSprite.y);
@@ -749,9 +799,6 @@ class PlayState extends FlxState
 							tempSprite.offset.set(offsetX2, offsetY2);
 							
 							objectsGroup.add(tempSprite);
-							
-							trace(objectSprite);
-							trace(tempSprite);
 							
 						case CornerBL:
 							// TODO: horrible
@@ -823,8 +870,12 @@ class PlayState extends FlxState
 							objectSprite.allowCollisions = FlxObject.UP | FlxObject.DOWN;
 							
 						default: 
-							trace('($x, $y) : $tileId => $prop');
+							objectSprite.allowCollisions = FlxObject.NONE;
+							//trace('($x, $y) : $tileId => $prop');
 					}
+				} else {
+					// No object at this position
+					trace('($x, $y)');
 				}
 			}
 		}

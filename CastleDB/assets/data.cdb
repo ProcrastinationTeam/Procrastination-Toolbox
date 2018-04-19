@@ -3014,36 +3014,39 @@
 								null,
 								null,
 								{
-									"hideHero": 1
+									"hideHero": 1,
+									"collide": "No"
 								},
-								{
-									"hideHero": 1
-								},
-								{
-									"hideHero": 1
-								},
-								{
-									"hideHero": 1
-								},
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
 								{
 									"hideHero": 1,
 									"collide": "No"
 								},
 								{
 									"hideHero": 1,
-									"collide": "Small"
+									"collide": "No"
+								},
+								{
+									"hideHero": 1
+								},
+								null,
+								null,
+								null,
+								null,
+								null,
+								null,
+								null,
+								null,
+								null,
+								null,
+								null,
+								null,
+								{
+									"hideHero": 1,
+									"collide": "HalfRight"
+								},
+								{
+									"hideHero": 1,
+									"collide": "Top"
 								},
 								{
 									"hideHero": 1,
