@@ -16,6 +16,7 @@ class Player extends FlxSprite
 		var heroData = Data.npcs.get(Data.NpcsKind.Hero);
 		//var npcsTileset:cdb.Data.TilesetProps = Data.levelDatas.get(LevelDatasKind.FirstVillage).props.getTileset(Data.levelDatas, heroData.image.file);
 		
+		// TODO: levelData.props.tileSize
 		super(npc.x * heroData.image.size, npc.y * heroData.image.size);
 		
 		// TODO: re use AssetPaths ?

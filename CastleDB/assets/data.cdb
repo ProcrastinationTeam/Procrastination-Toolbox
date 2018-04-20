@@ -429,7 +429,7 @@
 			"lines": [
 				{
 					"id": "Hero",
-					"name": "Kuro",
+					"name": "Mr Belly",
 					"image": {
 						"file": "MisterBelly.png",
 						"size": 16,
@@ -877,12 +877,32 @@
 							]
 						},
 						{
+							"x": 25,
+							"y": 9,
+							"width": 1,
+							"height": 1,
+							"action": [
+								0,
+								"Start"
+							]
+						},
+						{
 							"x": 33,
 							"y": 19,
 							"width": 1,
 							"height": 1,
 							"action": [
 								1,
+								"House"
+							]
+						},
+						{
+							"x": 33,
+							"y": 20,
+							"width": 1,
+							"height": 1,
+							"action": [
+								0,
 								"House"
 							]
 						},
@@ -1062,7 +1082,8 @@
 							"height": 1,
 							"action": [
 								1,
-								"FirstVillage"
+								"FirstVillage",
+								"House"
 							]
 						}
 					],
@@ -4174,7 +4195,7 @@
 					"args": [
 						{
 							"name": "l",
-							"typeStr": "6:levelDatas"
+							"typeStr": "1"
 						},
 						{
 							"name": "anchor",

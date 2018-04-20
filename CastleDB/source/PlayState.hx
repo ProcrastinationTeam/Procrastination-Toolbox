@@ -30,6 +30,11 @@ typedef Set = {
 	var opts : cdb.Data.TileModeOptions;
 }
 
+typedef Goto = {
+	var l : String;
+	var anchor : String;
+}
+
 class PlayState extends FlxState
 {
 	// "Entities"
@@ -57,7 +62,9 @@ class PlayState extends FlxState
 	private var sortableGroup			: FlxSpriteGroup				= new FlxSpriteGroup();
 	
 	private var changeScreenTriggers	: FlxSpriteGroup				= new FlxSpriteGroup();
-	private var mapOfTriggers			: Map<FlxSprite, Data.Action> 	= new Map<FlxSprite, Data.Action>();
+	
+	private var mapOfGoto				: Map<FlxSprite, Goto> 			= new Map<FlxSprite, Goto>();
+	private var mapOfAnchor				: Map<String, FlxPoint> 		= new Map<String, FlxPoint>();
 	
 	///////////////////////////////
 	// From lowest to highest priority of collision (each successive one overrides the previous behaviour if there was one)
@@ -82,29 +89,33 @@ class PlayState extends FlxState
 	
 	// BORDEL
 	private var houseSprite				: FlxSprite;
+	private var levelDataName			: String;
 	private var levelDataKind			: Data.LevelDatasKind;
 	private var levelData 				: Data.LevelDatas;
 	
+	private var anchor					: String;
+	
 	var _zoomCam:FlxZoomCamera;
 	
-	public function new(levelDataKind:Data.LevelDatasKind) {
+	public function new(levelDataName:String, ?anchor:String) {
 		super();
-		this.levelDataKind = levelDataKind;
+		this.levelDataName = levelDataName;
+		this.anchor = anchor;
 	}
 	
 	override public function create():Void
 	{
 		super.create();
 		
-		if (levelDataKind == null) {
-			levelDataKind = LevelDatasKind.FirstVillage;
+		if (levelDataName == null) {
+			levelDataName = "FirstVillage";
 		}
 		
 		// Init cdb
 		var content:String = File.getContent(AssetPaths.data__cdb);
 		Data.load(content);
 		
-		levelData = Data.levelDatas.get(levelDataKind);
+		levelData = Data.levelDatas.resolve(levelDataName);
 		
 		//traces(levelData);
 		
@@ -217,6 +228,14 @@ class PlayState extends FlxState
 		FlxG.camera.bgColor = FlxColor.BLACK;
 		
 		tilemapGround.follow(FlxG.camera, 0, true);
+		
+		// TODO: Move ?
+		// Place the player
+		if (anchor != null) {
+			var newPosition = mapOfAnchor.get(anchor);
+			player.reset(newPosition.x * levelData.props.tileSize, newPosition.y * levelData.props.tileSize);
+			FlxG.camera.snapToTarget();
+		}
 	}
 	
 	/**
@@ -282,18 +301,12 @@ class PlayState extends FlxState
 	//}
 	
 	private function ChangeScreenTriggerCallback(player:Player, triggerSprite:FlxSprite) {
-		var action:Data.Action = mapOfTriggers.get(triggerSprite);
+		var goto:Goto = mapOfGoto.get(triggerSprite);
 		
-		// Sucky way to cast it as a Goto, even though we're sure it is
-		switch(action) {
-			case Data.Action.Goto(l, anchor):
-				FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
-					FlxG.switchState(new PlayState(l.level));
-					FlxG.camera.fade(FlxColor.BLACK, 0.3, true);
-				});
-			default:
-				// Never happens
-		}
+		FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
+			FlxG.switchState(new PlayState(goto.l, goto.anchor));
+			FlxG.camera.fade(FlxColor.BLACK, 0.3, true);
+		});
 	}
 	
 	private function playerPickup(player:Player, pickup:Pickup):Void
@@ -880,7 +893,7 @@ class PlayState extends FlxState
 					
 				case NpcsKind.Finrod:
 					var finrod = Data.npcs.get(Data.NpcsKind.Finrod);
-					var finrodSprite = new FlxSprite(npc.x * finrod.image.size, npc.y * finrod.image.size);
+					var finrodSprite = new FlxSprite(npc.x * levelData.props.tileSize, npc.y * levelData.props.tileSize);
 					finrodSprite.immovable = true;
 					finrodSprite.x -= finrod.image.size / 2;
 					finrodSprite.y -= finrod.image.size;
@@ -911,15 +924,11 @@ class PlayState extends FlxState
 					// Spawn point
 					trace('Anchor - id: [$id]');
 					
+					mapOfAnchor.set(id, new FlxPoint(trigger.x, trigger.y));
+					
 				case Data.Action.Goto(l, anchor):
 					// Departure point
 					trace('Goto - l: [$l] - anchor: [$anchor]');
-					//if (l == "House" || l == "FirstVillage") {
-						//houseSprite = new FlxSprite(trigger.x * levelData.props.tileSize, trigger.y * levelData.props.tileSize);
-						//houseSprite.setSize(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height);
-						//houseSprite.makeGraphic(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height, FlxColor.TRANSPARENT);
-						//add(houseSprite);
-					//}
 					
 					var sprite = new FlxSprite(trigger.x * levelData.props.tileSize, trigger.y * levelData.props.tileSize);
 					sprite.setSize(levelData.props.tileSize * trigger.width, levelData.props.tileSize * trigger.height);
@@ -929,9 +938,10 @@ class PlayState extends FlxState
 					sprite.moves = false;
 					//sprite.allowCollisions = FlxObject.NONE;
 					
-					//add(sprite);
+					var goto:Goto = {l: l, anchor: anchor};
+					
 					changeScreenTriggers.add(sprite);
-					mapOfTriggers.set(sprite, trigger.action);
+					mapOfGoto.set(sprite, goto);
 					
 				case Data.Action.ScrollStop:
 					// Osef (scrollbounds ?)
