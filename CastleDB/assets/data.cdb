@@ -2894,15 +2894,15 @@
 								null,
 								null,
 								{
-									"hideHero": 2,
+									"hideHero": 1,
 									"collide": "Small"
 								},
 								{
-									"hideHero": 2,
+									"hideHero": 1,
 									"collide": "Small"
 								},
 								{
-									"hideHero": 2,
+									"hideHero": 1,
 									"collide": "Small"
 								},
 								{
@@ -2954,7 +2954,7 @@
 								null,
 								null,
 								{
-									"hideHero": 2,
+									"hideHero": 1,
 									"collide": "Small"
 								},
 								null,
@@ -3000,19 +3000,19 @@
 								null,
 								null,
 								{
-									"hideHero": 2,
+									"hideHero": 1,
 									"collide": "Small"
 								},
 								{
-									"hideHero": 2,
+									"hideHero": 1,
 									"collide": "Small"
 								},
 								{
-									"hideHero": 2,
+									"hideHero": 1,
 									"collide": "Small"
 								},
 								{
-									"hideHero": 2,
+									"hideHero": 1,
 									"collide": "Small"
 								},
 								null,
@@ -3213,15 +3213,15 @@
 								null,
 								null,
 								{
-									"hideHero": 1,
+									"hideHero": 2,
 									"collide": "No"
 								},
 								{
-									"hideHero": 1,
+									"hideHero": 2,
 									"collide": "No"
 								},
 								{
-									"hideHero": 1,
+									"hideHero": 2,
 									"collide": "No"
 								},
 								{

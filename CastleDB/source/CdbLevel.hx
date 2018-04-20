@@ -28,7 +28,7 @@ class CdbLevel {
 	public var pickupSprites 			: FlxSpriteGroup				= new FlxSpriteGroup();
 	
 	// Properties of the map (tile props and object props)
-	public var mapOfObjects			: Map<Int, Set> 				= new Map<Int, Set>();
+	public var mapOfObjects			: Map<Int, Set> 					= new Map<Int, Set>();
 	public var mapOfProps				: Map<Int, Dynamic> 			= new Map<Int, Dynamic>();
 	
 	// Tilemaps
@@ -39,14 +39,15 @@ class CdbLevel {
 	public var tilemapGround			: FlxTilemap					= new FlxTilemap();
 	public var tilemapsGroundBorders	: FlxTypedGroup<FlxTilemap>		= new FlxTypedGroup<FlxTilemap>();
 	public var tilemapObjects 			: FlxTilemapExt					= new FlxTilemapExt();
-	public var tilemapOver 			: FlxTilemap					= new FlxTilemap();
+	public var tilemapOver 				: FlxTilemap					= new FlxTilemap();
 	
 	public var groundObjectsGroup		: FlxSpriteGroup				= new FlxSpriteGroup();
-	public var objectsGroup			: FlxSpriteGroup				= new FlxSpriteGroup();
+	public var objectsGroup				: FlxSpriteGroup				= new FlxSpriteGroup();
+	public var overObjectsGroup			: FlxSpriteGroup				= new FlxSpriteGroup();
 	
 	public var sortableGroup			: FlxSpriteGroup				= new FlxSpriteGroup();
 	
-	public var changeScreenTriggers	: FlxSpriteGroup				= new FlxSpriteGroup();
+	public var changeScreenTriggers		: FlxSpriteGroup				= new FlxSpriteGroup();
 	
 	public var mapOfGoto				: Map<FlxSprite, Goto> 			= new Map<FlxSprite, Goto>();
 	public var mapOfAnchor				: Map<String, FlxPoint> 		= new Map<String, FlxPoint>();
@@ -62,7 +63,7 @@ class CdbLevel {
 	public var collisionsGroup			: FlxGroup						= new FlxGroup();
 	
 	// TODO: https://github.com/HaxeFlixel/flixel/issues/559 ?
-	// private var tilemapCollisions		: FlxTilemap					= new FlxTilemap();
+	// private var tilemapCollisions		: FlxTilemap				= new FlxTilemap();
 	///////////////////////////////
 	
 	// Depending on your map, this can impact the performances quite a lot
@@ -423,8 +424,12 @@ class CdbLevel {
 					return sprite;
 				});
 				
+				//trace('($x, $y) : $prop');
+				
 				if (prop == null || prop.hideHero == null || prop.hideHero == 0) {
 					groundObjectsGroup.add(objectSprite);
+				} else if (prop.hideHero == 2) {
+					overObjectsGroup.add(objectSprite);
 				} else {
 					objectsGroup.add(objectSprite);
 				}

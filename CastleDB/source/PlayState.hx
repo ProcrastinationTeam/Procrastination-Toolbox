@@ -54,6 +54,9 @@ class PlayState extends FlxState {
 		add(level.sortableGroup);
 		////////
 		
+		// Then "over objects" (alway above the rest)
+		add(level.overObjectsGroup);
+		
 		// Then the over layer (top of trees and cliffs ?)
 		add(level.tilemapOver);
 		
@@ -86,6 +89,7 @@ class PlayState extends FlxState {
 		FlxG.collide(level.player, level.collisionsGroup);
 		FlxG.collide(level.player, level.objectsGroup);
 		FlxG.collide(level.player, level.groundObjectsGroup);
+		FlxG.collide(level.player, level.overObjectsGroup);
 		
 		FlxG.overlap(level.player, level.changeScreenTriggers, ChangeScreenTriggerCallback);
 		
