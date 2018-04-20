@@ -1,5 +1,8 @@
 package;
 
+import Data;
+import flixel.FlxSprite;
+
 class Pickup extends FlxSprite
 {
 	public var money : Float;

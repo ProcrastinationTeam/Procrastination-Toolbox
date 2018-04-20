@@ -1,15 +1,15 @@
 package;
 
-import cdb.Data.LayerMode;
+import Data;
 import flixel.FlxCamera.FlxCameraFollowStyle;
+import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.FlxSprite;
-import flixel.addons.display.FlxZoomCamera;
-import flixel.group.FlxGroup;
-import flixel.math.FlxPoint;
+import flixel.FlxState;
 import flixel.util.FlxColor;
-import flixel.FlxCamera;
 import flixel.util.FlxSort;
 import openfl.Assets;
+import typedefs.Goto;
 
 class PlayState extends FlxState {
 	
