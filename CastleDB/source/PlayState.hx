@@ -68,6 +68,8 @@ class PlayState extends FlxState {
 		FlxG.camera.snapToTarget();
 		
 		level.tilemapGround.follow(FlxG.camera, 0, true);
+		
+		FlxG.camera.fade(FlxColor.BLACK, 0.2, true);
 	}
 	
 	override public function update(elapsed:Float):Void {
@@ -112,9 +114,8 @@ class PlayState extends FlxState {
 	private function ChangeScreenTriggerCallback(player:Player, triggerSprite:FlxSprite) {
 		var goto:Goto = level.mapOfGoto.get(triggerSprite);
 		
-		FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
+		FlxG.camera.fade(FlxColor.BLACK, 0.2, false, function() {
 			FlxG.switchState(new PlayState(goto.l, goto.anchor));
-			FlxG.camera.fade(FlxColor.BLACK, 0.3, true);
 		});
 	}
 	
