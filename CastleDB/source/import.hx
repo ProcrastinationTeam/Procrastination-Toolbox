@@ -1,4 +1,4 @@
-import sys.io.File;
+//import sys.io.File;
 
 import openfl.display.Sprite;
 

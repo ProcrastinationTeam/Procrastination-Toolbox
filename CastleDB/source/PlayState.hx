@@ -9,6 +9,7 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.FlxCamera;
 import flixel.util.FlxSort;
+import openfl.Assets;
 
 class PlayState extends FlxState {
 	
@@ -32,7 +33,8 @@ class PlayState extends FlxState {
 		}
 		
 		// Init cdb
-		var content:String = File.getContent(AssetPaths.data__cdb);
+		//var content:String = File.getContent(AssetPaths.data__cdb);
+		var content:String = Assets.getText(AssetPaths.data__cdb);
 		Data.load(content);
 		
 		//levelData = Data.levelDatas.resolve(levelDataName);
