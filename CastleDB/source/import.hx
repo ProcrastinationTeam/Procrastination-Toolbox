@@ -27,3 +27,6 @@ import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
 
 import Data;
+
+import typedefs.Set;
+import typedefs.Goto;
