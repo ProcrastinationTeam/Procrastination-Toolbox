@@ -88,15 +88,12 @@ class PlayState extends FlxState
 	
 	
 	// BORDEL
-	private var houseSprite				: FlxSprite;
 	private var levelDataName			: String;
 	private var levelDataKind			: Data.LevelDatasKind;
 	private var levelData 				: Data.LevelDatas;
 	
 	private var anchor					: String;
-	
-	var _zoomCam:FlxZoomCamera;
-	
+		
 	public function new(levelDataName:String, ?anchor:String) {
 		super();
 		this.levelDataName = levelDataName;
@@ -264,7 +261,6 @@ class PlayState extends FlxState
 		FlxG.collide(player, objectsGroup);
 		FlxG.collide(player, groundObjectsGroup);
 		
-		//FlxG.overlap(player, houseSprite, HouseEnter);
 		FlxG.overlap(player, changeScreenTriggers, ChangeScreenTriggerCallback);
 		
 		// Debug
