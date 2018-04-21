@@ -32,7 +32,7 @@
 	<!--<assets path="assets/images" type="image" exclude="*.ase|*.psd|OLD-WORK" />-->
 	
 	<classpath name="source" />
-	<assets path="assets" />
+	<assets path="assets" embed="true" />
 	
 	<!-- _______________________________ Libraries ______________________________ -->
 
