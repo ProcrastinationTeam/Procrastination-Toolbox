@@ -7,5 +7,7 @@ Got a little lost, now waiting for latest OpenFL support where it should be a lo
 Simple implementation of [this talk](https://www.youtube.com/watch?v=hG9SzQxaCm8) about how to build easier to tweak jumps.
 > - **CastleDB**:
 HaxeFlixel example to use [CastleDB](https://github.com/ncannasse/castle) and [CastleDB's level editor](http://castledb.org/#level).
+> - **Template**:
+Our template for now projets. We'll try to have a heavily documented project.xml
 
 More to come!
